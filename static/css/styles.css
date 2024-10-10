@@ -1,0 +1,185 @@
+/* General styling */
+body {
+    background-color: #F2E6D8; /* Warm Beige */
+    color: #2C2C2C; /* Charcoal Gray */
+    font-family: 'Verdana', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #E94B3C; /* Vintage Red */
+}
+
+a {
+    color: #4C6793; /* Muted Navy Blue */
+    text-decoration: none;
+}
+
+a:hover {
+    color: #FFCC00; /* Golden Yellow */
+    text-decoration: underline;
+}
+
+/* Buttons */
+button, .btn {
+    background-color: #E94B3C; /* Vintage Red */
+    color: #FFFFFF; /* White text */
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover, .btn:hover {
+    background-color: #FFCC00; /* Golden Yellow */
+    color: #2C2C2C; /* Darker text color on hover */
+}
+
+/* Inputs */
+input[type="text"], input[type="email"], textarea {
+    background-color: #FFFFFF; /* White background */
+    color: #2C2C2C; /* Charcoal Gray text */
+    border: 1px solid #4C6793; /* Muted Navy Blue border */
+    padding: 10px;
+    font-size: 16px;
+    width: 100%;
+    margin-bottom: 15px;
+    border-radius: 4px;
+}
+
+input[type="text"]::placeholder, input[type="email"]::placeholder, textarea::placeholder {
+    color: #6B6B6B; /* Medium Gray Placeholder */
+}
+
+input[type="text"]:focus, input[type="email"]:focus, textarea:focus {
+    border-color: #E94B3C; /* Vintage Red focus */
+    outline: none;
+}
+
+/* Comment section */
+.comment-box {
+    background-color: #FFFFFF; /* White background for comments */
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 4px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); /* Light shadow for depth */
+}
+
+.comment-author {
+    color: #E94B3C; /* Vintage Red for author names */
+    font-weight: bold;
+}
+
+.comment-content {
+    color: #2C2C2C; /* Charcoal Gray for comment text */
+}
+
+/* Navigation */
+.navbar {
+    background-color: #F2E6D8; /* Warm Beige background */
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #E94B3C; /* Vintage Red border */
+}
+
+.navbar a {
+    color: #2C2C2C; /* Charcoal Gray for links */
+    margin: 0 15px;
+}
+
+.navbar a:hover {
+    color: #FFCC00; /* Golden Yellow for hover effect */
+}
+
+/* Footer */
+footer {
+    background-color: #F2E6D8; /* Warm Beige background */
+    padding: 20px;
+    text-align: center;
+    color: #2C2C2C; /* Charcoal Gray text */
+    font-size: 14px;
+}
+
+footer a {
+    color: #4C6793; /* Muted Navy Blue */
+}
+
+footer a:hover {
+    color: #FFCC00; /* Golden Yellow */
+}
+
+/* Alerts/Notifications */
+.alert {
+    background-color: #FFCC00; /* Golden Yellow for important messages */
+    color: #2C2C2C; /* Charcoal Gray text */
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+/* Navbar Styling */
+.navbar {
+    background-color: #F2E6D8; /* Warm Beige background */
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid #E94B3C; /* Vintage Red border */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+.navbar .logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: #E94B3C; /* Vintage Red */
+    text-decoration: none;
+}
+
+.navbar ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+}
+
+.navbar ul li {
+    margin-left: 20px;
+}
+
+.navbar ul li a {
+    color: #2C2C2C; /* Charcoal Gray for links */
+    font-size: 18px;
+    text-decoration: none;
+    padding: 8px 12px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    border-radius: 4px;
+}
+
+.navbar ul li a:hover {
+    background-color: #FFCC00; /* Golden Yellow hover effect */
+    color: #2C2C2C; /* Charcoal Gray on hover */
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .navbar ul {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .navbar ul li {
+        margin-left: 0;
+        margin-bottom: 10px;
+    }
+
+    .navbar ul li a {
+        display: block;
+        width: 100%;
+    }
+}
