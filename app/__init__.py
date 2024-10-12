@@ -126,7 +126,29 @@ def create_app():
         session.pop('user_id', None)  # Remove the user_id from the session
         return jsonify({"success": True}), 200
 
+    @flask_app.route('/profile')
+    def profile():
+        current_user = get_current_user()
+        db_conn = get_db_connection()
+        cursor = db_conn.cursor()
+        # Fetch user comments from the database
+        cursor.execute('''
+            SELECT c.comment, c.created_at, s.title 
+            FROM show_comments c 
+            JOIN shows s ON c.show_id = s.id 
+            WHERE c.user_id = ?
+            ORDER BY c.created_at DESC
+        ''', (current_user.uid,))
 
+        comments = cursor.fetchall()  # Fetch all comments for the current user
+
+        formatted_comments = [{
+            'comment': comment['comment'],
+            'created_at': datetime.strptime(comment['created_at'], "%Y-%m-%d %H:%M:%S.%f").strftime("%B %d, %Y, %I:%M %p"),
+            'title': comment['title']
+        } for comment in comments]
+
+        return render_template('userProfile.html', user=current_user, comments=formatted_comments)
 
     @flask_app.route('/api/post_comment/<int:show_id>', methods = ["POST"])
     @flask_app.route('/api/post_comment/<int:show_id>/<int:parent_comment_id>', methods = ["POST"])
@@ -157,7 +179,7 @@ def create_app():
                 return jsonify({"error": "Parent comment does not belong to this show", "success": False}), 400
         cursor.execute(
             "INSERT INTO show_comments (show_id, user_id, comment, created_at, comment_parent_id) VALUES (?, ?, ?, ?, ?)",
-            (show_id, get_current_user().uid, request.json["content"], datetime.utcnow(), parent_comment_id)
+            (show_id, get_current_user().uid, request.json["content"], datetime.now(), parent_comment_id)
         )
         db_conn.commit()
         comment_id = cursor.lastrowid
@@ -212,7 +234,7 @@ def create_app():
             
         return jsonify({"success": True, "comments": serialized_comments}), 200
 
-    @flask_app.route("/api/delete_comment/<int:comment_id>", methods = ["DELETE"])
+    @flask_app.route("/api/delete_comment/<int:comment_id>", methods = ["UPDATE"])
     def delete_comment_handler( comment_id : int ):
         if get_current_user() is None:
             return jsonify({"error": "Not logged in", "success": False}), 401
@@ -225,13 +247,10 @@ def create_app():
         if comment["user_id"] != get_current_user().uid:
             return jsonify({"error": "Not authorized to delete this comment", "success": False}), 403
         
-        def recursively_delete( comment_id : int ):
-            cursor.execute("SELECT * FROM show_comments WHERE comment_parent_id = ?", (comment_id,))
-            children = cursor.fetchall()
-            for child in children:
-                recursively_delete(child["id"])
-            cursor.execute("DELETE FROM show_comments WHERE id = ?", (comment_id,))
-        recursively_delete(comment_id)
+        def pseudo_del_comment( comment_id : int ):
+            cursor.execute("UPDATE show_comments SET comment = '[deleted]', is_deleted = 'TRUE' WHERE id = ?", (comment_id,))
+
+        pseudo_del_comment(comment_id)
         db_conn.commit()
         return jsonify({"success": True}), 200
 

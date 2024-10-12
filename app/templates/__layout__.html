@@ -10,6 +10,7 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.17.1/cdn/themes/light.css" />
         <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.17.1/cdn/shoelace-autoloader.js"></script>
         <script src="{{ url_for( 'static', filename='js/logout_handler.js' )}}"></script>
+        <script src="{{ url_for( 'static', filename='js/user_profile.js' )}}"></script>
         <!--<link rel="stylesheet" href="static/css/styles.css">-->
         {% block head %}
         {% endblock %}
@@ -26,7 +27,9 @@
                         <div class="flex items-center ms-auto text-gray-200">
                             {% if current_user %}
                             <p class="text-sm font-semibold me-2">{{ current_user.name }}</p>
-                            <sl-avatar image="https://www.gravatar.com/avatar/{{ gravatar_email_hash }}&d=retro" label="{{current_user.name}}" style="--size: 2rem;"></sl-avatar>
+                            <a href="/profile" id="profile-button" class="flex items-center">
+                                <sl-avatar image="https://www.gravatar.com/avatar/{{ gravatar_email_hash }}?d=retro" label="{{ current_user.name }}" style="--size: 2rem;"></sl-avatar>
+                            </a>
                             <sl-button class="ms-4" type="primary" id="logout-button">Logout</sl-button>
                             {% else %}
                             <sl-button class="ms-4" type="primary" href="/login">Login</sl-button>

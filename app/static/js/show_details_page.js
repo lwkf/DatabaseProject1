@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         new_comment.querySelector('.comment-username-label').innerText = comment_data.user.username;
         new_comment.querySelector('.comment-text').innerText = comment_data.content;
         new_comment.querySelector('.comment-datetime').date = comment_data.created_at;
-        new_comment.querySelector('.comment-avatar').image = `https://www.gravatar.com/avatar/${ comment_data.user.gravatar_hash }&d=retro`
+        new_comment.querySelector('.comment-avatar').image = `https://www.gravatar.com/avatar/${ comment_data.user.gravatar_hash }?d=retro`
         const reply_button = new_comment.querySelector('.comment-reply-button');
         const delete_button = new_comment.querySelector('.comment-delete-button');
         if ( comment_data.user.id != current_user_id ) {
@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         if ( comment_data.user.id == current_user_id ) {
             delete_button.addEventListener('click', async function() {
                 const response = await fetch(`/api/delete_comment/${comment_data.id}`, {
-                    method: 'DELETE',
+                    method: 'UPDATE',
                 });
                 if (response.status === 200) {
                     new_comment.remove();
