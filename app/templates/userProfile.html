@@ -2,17 +2,22 @@
 {% block title %}Profile{% endblock %}
 {% block content %}
 <div class="max-w-md mx-auto p-4">
-    <h1 class="text-2xl font-semibold mb-4">{{ user.name }}'s Profile</h1>
+    <h1 class="text-2xl font-semibold mb-4">Your Profile</h1>
+    <p class="mb-2">Name: <span class="text-gray-600">{{ user.name }}</span></p>
     <p class="mb-2">Email: <span class="text-gray-600">{{ user.email }}</span></p>
-    <h2 class="text-2xl font-semibold mb-4">User Comments</h2>
+    <h2 class="text-2xl font-semibold mb-4">Your Comments</h2>
     <div class="bg-white shadow-md rounded-lg p-6">
         {% if comments %}
             <ul class="space-y-4">
                 {% for comment in comments %}
                     <li class="border border-gray-300 p-4 rounded-lg">
                         <div class="flex justify-between">
-                            <strong class="text-lg text-blue-700">{{ comment.title }}</strong>
-                            <sl-icon-button name="trash" label="Delete" class="comment-delete-button"></sl-icon-button>
+                            <strong class="text-lg text-blue-700">
+                                <a href="/shows/{{ comment.show_id }}/--">{{ comment.title }}</a>
+                            </strong>
+                            {% if not comment.is_deleted %}
+                                <sl-icon-button name="trash" label="Delete" class="comment-delete-button"></sl-icon-button>
+                            {% endif %}
                         </div>
                         <p class="text-sm text-gray-500 ml-4">{{ comment.created_at }}</p>
                         <p class="text-gray-600 mt-2">{{ comment.comment }}</p>

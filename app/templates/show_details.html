@@ -1,4 +1,5 @@
-{% extends '__layout__.html' %} {% block title %}{{show['title']}}{% endblock %}
+{% extends '__layout__.html' %} 
+{% block title %}{{show['title']}}{% endblock %}
 {% block head %}
 <style>
   .comment::part(label) {
@@ -13,12 +14,8 @@
     bottom: 0;
     left: 0;
     right: 0;
-    height: 30px; /* Adjust as needed */
-    background: linear-gradient(
-      to top,
-      white,
-      rgba(255, 255, 255, 0)
-    ); /* Fading from white to transparent */
+    height: 30px;
+    background: linear-gradient(to top, white, rgba(255, 255, 255, 0) );
     display: block;
   }
   #actor-list-container {
@@ -31,10 +28,7 @@
       <sl-avatar class="comment-avatar" style="--size: 3rem"></sl-avatar>
       <div class="ms-2">
         <p class="m-0 font-semibold comment-username-label"></p>
-        <sl-relative-time
-          sync
-          class="text-sm m-0 mt-1 comment-datetime"
-        ></sl-relative-time>
+        <sl-relative-time sync class="text-sm m-0 mt-1 comment-datetime"></sl-relative-time>
       </div>
       <div class="ms-auto flex">
         <sl-icon-button
@@ -100,45 +94,43 @@
       <div class="bg-white rounded-md p-4 mt-4">
         <h1 class="text-2xl font-semibold mb-2">Directors</h1>
         <p class="text-gray-800">
-          {% set directors = cast | selectattr('person_role', 'equalto',
-          'Director') | list %} {% if directors %} {% for person in directors %}
-          <strong>{{ person['person_name'] }}</strong> as {{
-          person['character_name'] if person['character_name'] else 'Director'
-          }} {% if not loop.last %} • {% endif %} {% endfor %} {% else %}
-          <em>Not Filled Yet</em>
+          {% set directors = cast | selectattr('person_role', 'equalto', 'Director') | list %} 
+          {% if directors %} 
+            {% for person in directors %}
+              <strong>{{ person['person_name'] }}</strong> as {{ person['character_name'] if person['character_name'] else 'Director' }} 
+              {% if not loop.last %} 
+                • 
+              {% endif %} 
+            {% endfor %} 
+          {% else %}
+            <em>Not Filled Yet</em>
           {% endif %}
         </p>
       </div>
       <div class="bg-white rounded-md p-4 mt-4">
         <h1 class="text-2xl font-semibold mb-2">Actors</h1>
-        <div
-          id="actor-list-container"
-          class="relative"
-          style="max-height: 100px; overflow: hidden"
-        >
+        <div id="actor-list-container" class="relative" style="max-height: 100px; overflow: hidden;">
           <p class="text-gray-800">
-            {% set actors = cast | selectattr('person_role', 'equalto', 'Actor')
-            | list %} {% if actors %} {% for person in actors %}
-            <!-- Display all actors -->
-            <strong>{{ person['person_name'] }}</strong> as {{
-            person['character_name'] if person['character_name'] else 'N/A' }}
-            {% if not loop.last %} • {% endif %} {% endfor %} {% else %}
-            <em>Not Filled Yet</em>
+            {% set actors = cast | selectattr('person_role', 'equalto', 'Actor') | list %} 
+            {% if actors %} 
+              {% for person in actors %} 
+                <strong>{{ person['person_name'] }}</strong> as {{ person['character_name'] if person['character_name'] else 'N/A' }}
+                {% if not loop.last %} 
+                  • 
+                {% endif %} 
+              {% endfor %} 
+            {% else %}
+              <em>Not Filled Yet</em>
             {% endif %}
-          </p>
+        </p>
           {% if actors|length > 14 %}
           <div id="fade-overlay" class="fade-effect"></div>
           {% endif %}
         </div>
         {% if actors|length > 14 %}
-        <div class="text-center mt-4">
-          <a
-            href="javascript:void(0);"
-            onclick="toggleViewMore('actor-list-container', 'fade-overlay', this)"
-            class="text-blue-500"
-            >View More</a
-          >
-        </div>
+          <div class="text-center mt-4">
+            <a href="javascript:void(0);" onclick="toggleViewMore('actor-list-container', 'fade-overlay', this)" class="text-blue-500" >View More</a>
+          </div>
         {% endif %}
       </div>
       <div class="bg-white rounded-md p-4 mt-4">
@@ -192,11 +184,7 @@
           data-showid="{{ show['id'] }}"
         >
         </sl-tree>
-        <p
-          class="text-gray-800 text-ellipsis w-full overflow-hidden"
-          style="display: none"
-          id="no-comments-label"
-        >
+        <p class="text-gray-800 text-ellipsis w-full overflow-hidden" style="display: none" id="no-comments-label">
           No comments yet.
         </p>
       </div>

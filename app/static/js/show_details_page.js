@@ -1,3 +1,18 @@
+function toggleViewMore(containerId, overlayId, link) {
+    var container = document.getElementById(containerId);
+    var overlay = document.getElementById(overlayId);
+    
+    if (container.style.maxHeight === "100px" || container.style.maxHeight === "") {  
+        container.style.maxHeight = container.scrollHeight + "px";  
+        if (overlay) overlay.style.display = "none";  
+        link.innerHTML = "View Less";  
+    } else {  
+        container.style.maxHeight = "100px";  
+        if (overlay) overlay.style.display = "block";  
+        link.innerHTML = "View More";  
+    }
+}
+
 document.addEventListener('DOMContentLoaded', async function() {
     const comment_template = document.getElementById('comment-template');
     const comment_container = document.getElementById('comments-container');
@@ -13,21 +28,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     const current_user_id = Number(this.body.getAttribute('data-authenticated-user-id'));
 
     var selected_comment = null;
-
-    function toggleViewMore(containerId, overlayId, link) {
-        var container = document.getElementById(containerId);
-        var overlay = document.getElementById(overlayId);
-        
-        if (container.style.maxHeight === "100px" || container.style.maxHeight === "") {  
-            container.style.maxHeight = container.scrollHeight + "px";  
-            if (overlay) overlay.style.display = "none";  
-            link.innerHTML = "View Less";  
-        } else {  
-            container.style.maxHeight = "100px";  
-            if (overlay) overlay.style.display = "block";  
-            link.innerHTML = "View More";  
-        }
-    }
     
     async function buildComment( comment_data, parent_element ) {
         if ( document.getElementById(`comment-${comment_data.id}`) ) {
@@ -88,6 +88,10 @@ document.addEventListener('DOMContentLoaded', async function() {
                     comment_error_label.style.display = 'block';
                 }
             });
+        }
+        if ( comment_data.is_deleted == "TRUE" ) {
+            reply_button.style.display = 'none';
+            delete_button.style.display = 'none';
         }
 
         parent_element.appendChild(new_comment);

@@ -26,14 +26,14 @@
                         </div>
                         <div class="flex items-center ms-auto text-gray-200">
                             {% if current_user %}
-                            <p class="text-sm font-semibold me-2">{{ current_user.name }}</p>
-                            <a href="/profile" id="profile-button" class="flex items-center">
-                                <sl-avatar image="https://www.gravatar.com/avatar/{{ gravatar_email_hash }}?d=retro" label="{{ current_user.name }}" style="--size: 2rem;"></sl-avatar>
-                            </a>
-                            <sl-button class="ms-4" type="primary" id="logout-button">Logout</sl-button>
+                                <a href="/profile" id="profile-button" class="flex items-center">
+                                    <p class="text-sm font-semibold me-2">{{ current_user.name }}</p>
+                                    <sl-avatar image="https://www.gravatar.com/avatar/{{ gravatar_email_hash }}?d=retro" label="{{ current_user.name }}" style="--size: 2rem;"></sl-avatar>
+                                </a>
+                                <sl-button class="ms-4" type="primary" id="logout-button">Logout</sl-button>
                             {% else %}
-                            <sl-button class="ms-4" type="primary" href="/login">Login</sl-button>
-                            <sl-button class="ms-4" type="primary" href="/register">Register</sl-button>
+                                <sl-button class="ms-4" type="primary" href="/login">Login</sl-button>
+                                <sl-button class="ms-4" type="primary" href="/register">Register</sl-button>
                             {% endif %}
                         </div>
                     </div>

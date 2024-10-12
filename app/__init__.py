@@ -2,7 +2,8 @@ import os
 import slugify
 import re
 import hashlib
-from flask import Flask, render_template, request, jsonify, g, session, redirect, abort
+import urllib.parse
+from flask import Flask, render_template, request, jsonify, g, session, redirect, abort, url_for, request
 from datetime import datetime
 from app.init_db import init_db
 from app.utils import get_db_connection
@@ -57,7 +58,7 @@ def create_app():
         show_genres = cursor.execute("SELECT genre FROM show_genres WHERE imdb_id = ?", (show['imdb_id'],)).fetchall()
         cast = cursor.execute("SELECT person_name, character_name, person_role FROM credits WHERE title_id = ?", (show['title_id'],)).fetchall()
         show_countries = cursor.execute("SELECT country FROM show_production_countries WHERE imdb_id = ?", (show['imdb_id'],)).fetchall()
-        return render_template("show_details.html", show = show, show_genres = show_genres, cast = cast,show_countries=show_countries )
+        return render_template("show_details.html", show = show, show_genres = show_genres, cast = cast, show_countries=show_countries)
 
     @flask_app.route('/genres/<genre_name>', methods = ["GET"])
     def genre_page(genre_name : str):
@@ -76,6 +77,24 @@ def create_app():
         country = request.args.get('country')  # Country filter
         show_type = request.args.get('show_type')  # Show type filter
         age_certification = request.args.get('age_certification')  # Age certification filter
+
+        # Construct a dictionary of non-empty filters
+        query_params = {
+            "genre": genre,
+            "query": search_query,
+            "release_year": release_year,
+            "country": country,
+            "show_type": show_type,
+            "age_certification": age_certification
+        }
+
+        # Remove keys with empty values
+        query_params = {k: v for k, v in query_params.items() if v}
+
+        # If current request URL doesn't match the cleaned parameters, redirect to the new URL
+        current_query_string = urllib.parse.urlencode(query_params)
+        if request.query_string.decode('utf-8') != current_query_string:
+            return redirect(f"{url_for('catalogue_page')}?{current_query_string}")
 
         query = "SELECT * FROM shows"
         params = []
@@ -145,7 +164,6 @@ def create_app():
         result_text = f"Showing Top {min(result_count, 60)} results"
         if result_count == 0:
             result_text = "No show/movie found for"
-
         if search_query:
             result_text += f"  Search Query: '{search_query}'"
         if genre:
@@ -243,7 +261,7 @@ def create_app():
         cursor = db_conn.cursor()
         # Fetch user comments from the database
         cursor.execute('''
-            SELECT c.comment, c.created_at, s.title 
+            SELECT c.comment, c.created_at, c.show_id, c.is_deleted, s.title 
             FROM show_comments c 
             JOIN shows s ON c.show_id = s.id 
             WHERE c.user_id = ?
@@ -255,7 +273,9 @@ def create_app():
         formatted_comments = [{
             'comment': comment['comment'],
             'created_at': datetime.strptime(comment['created_at'], "%Y-%m-%d %H:%M:%S.%f").strftime("%B %d, %Y, %I:%M %p"),
-            'title': comment['title']
+            'title': comment['title'],
+            'show_id': comment['show_id'],
+            'is_deleted': comment['is_deleted']
         } for comment in comments]
 
         return render_template('userProfile.html', user=current_user, comments=formatted_comments)
@@ -338,8 +358,9 @@ def create_app():
                     "gravatar_hash": hashlib.sha256((user_poster.email.lower().strip()).encode("utf-8")).hexdigest()
                 },
                 "content": comment["comment"],
-                "created_at": f"{comment['created_at']}-00:00",
-                "total_children": total_children
+                "created_at": datetime.strptime(comment['created_at'], "%Y-%m-%d %H:%M:%S.%f").strftime("%B %d, %Y, %I:%M %p"),
+                "total_children": total_children,
+                "is_deleted": comment["is_deleted"]
             })
             
         return jsonify({"success": True, "comments": serialized_comments}), 200
