@@ -1,0 +1,26 @@
+{% extends '__layout__.html' %}
+{% block title %}{{show['title']}}{% endblock %}
+{% block head %}
+{% endblock %}
+{% block content %}
+    <div class="max-w-[1200px] me-auto ms-auto pt-3">
+        <div class="flex">
+            <div class="w-1/4">
+                <div class="p-4 bg-white rounded-md drop-shadow-md">
+                    <img src="https://m.media-amazon.com/images/M/MV5BNThiZjA3MjItZGY5Ni00ZmJhLWEwN2EtOTBlYTA4Y2E0M2ZmXkEyXkFqcGc@._V1_FMjpg_UY1929_.jpg" alt="Movie poster" class="w-full rounded-md">
+                </div>
+            </div>
+            <div class="w-3/4 pl-4">
+                <div class="bg-white rounded-md p-4">
+                    <h1 class="text-3xl font-semibold mb-2">{{ show["title"] }}</h1>
+                    <div class="flex items-center">{% for genre in show_genres %}<sl-badge variant="neutral" pill>{{ genre['genre'] }}</sl-badge>{% endfor %}</div>
+                    <p class="text-gray-800 text-ellipsis w-full overflow-hidden font-semibold">{{ show["release_year"] }} • <sl-rating label="Rating" readonly value="{{ show['imdb_score'] / 2 }}" style="--symbol-size: 12px;"></sl-rating> • {{ show['age_ceritification'] }} • {{ show['show_type']}}</p>
+                    <p class="text-gray-800 text-ellipsis w-full overflow-hidden">{{ show["description"] }}</p>
+                </div>
+                <div class="bg-white rounded-md p-4 mt-4">
+                    <h2 class="text-2xl font-semibold mb-2">User comments</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

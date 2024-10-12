@@ -50,7 +50,7 @@
     <div class="max-w-[1200px] me-auto ms-auto pt-3">
         <div class="movies-container">
             {% for show in shows %}
-            <a href="/movies/{{show['id']}}/--" class="movie-card drop-shadow-md">
+            <a href="/shows/{{show['id']}}/--" class="movie-card drop-shadow-md">
                 <img src="https://m.media-amazon.com/images/M/MV5BNThiZjA3MjItZGY5Ni00ZmJhLWEwN2EtOTBlYTA4Y2E0M2ZmXkEyXkFqcGc@._V1_FMjpg_UY1929_.jpg" alt="Movie poster" class="w-full">
                 <div class="movie-card-details">
                     <h3 class="font-semibold">{{ show["title"] }}</h3>

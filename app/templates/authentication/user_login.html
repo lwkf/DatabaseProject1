@@ -1,6 +1,7 @@
 {% extends '__layout__.html' %}
 {% block title %}Login{% endblock %}
 {% block head %}
+<script src="{{ url_for( 'static', filename='js/login_handler.js' )}}"></script>
 {% endblock %}
 {% block content %}
     <div class="max-w-[1200px] min-h-[calc(100vh-80px)] flex items-center ms-auto me-auto">

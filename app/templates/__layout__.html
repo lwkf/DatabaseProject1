@@ -23,7 +23,7 @@
                         </div>
                         <div class="flex items-center ms-auto text-gray-200">
                             {% if current_user %}
-                            <p class="text-sm font-semibold me-4">{{ current_user.name }}</p>
+                            <p class="text-sm font-semibold me-2">{{ current_user.name }}</p>
                             <sl-avatar image="https://www.gravatar.com/avatar/{{ gravatar_email_hash }}" label="{{current_user.name}}" style="--size: 2rem;"></sl-avatar>
                             {% else %}
                             <sl-button class="ms-4" type="primary" href="/login">Login</sl-button>

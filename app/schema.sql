@@ -70,3 +70,6 @@ CREATE TABLE show_comments (
     FOREIGN KEY (show_id) REFERENCES shows(id),
     FOREIGN KEY (user_id) REFERENCES users(uid)
 );
+CREATE INDEX show_comments_show_id_index ON show_comments (show_id);
+CREATE INDEX show_comments_user_id_index ON show_comments (user_id);
+CREATE INDEX show_comments_comment_parent_id_index ON show_comments (comment_parent_id);
