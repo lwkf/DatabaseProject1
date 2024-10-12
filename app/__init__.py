@@ -56,7 +56,8 @@ def create_app():
         
         show_genres = cursor.execute("SELECT genre FROM show_genres WHERE imdb_id = ?", (show['imdb_id'],)).fetchall()
         cast = cursor.execute("SELECT person_name, character_name, person_role FROM credits WHERE title_id = ?", (show['title_id'],)).fetchall()
-        return render_template("show_details.html", show = show, show_genres = show_genres, cast = cast)
+        show_countries = cursor.execute("SELECT country FROM show_production_countries WHERE imdb_id = ?", (show['imdb_id'],)).fetchall()
+        return render_template("show_details.html", show = show, show_genres = show_genres, cast = cast,show_countries=show_countries )
 
     @flask_app.route('/genres/<genre_name>', methods = ["GET"])
     def genre_page(genre_name : str):
@@ -66,6 +67,114 @@ def create_app():
         cursor.execute("SELECT * FROM shows JOIN show_genres ON shows.imdb_id = show_genres.imdb_id WHERE show_genres.genre = ? ORDER BY imdb_popularity DESC LIMIT 60", (genre_name,))
         shows = cursor.fetchall()
         return render_template("genre_page.html", genre_name = genre_name, shows = shows)
+    
+    @flask_app.route('/catalogue', methods=["GET"])
+    def catalogue_page():
+        genre = request.args.get('genre')  # Genre filter
+        search_query = request.args.get('query')  # Search query
+        release_year = request.args.get('release_year')  # Release year filter
+        country = request.args.get('country')  # Country filter
+        show_type = request.args.get('show_type')  # Show type filter
+        age_certification = request.args.get('age_certification')  # Age certification filter
+
+        query = "SELECT * FROM shows"
+        params = []
+
+        # Adding filters to the query
+        where_clauses = []
+        if genre:
+            query += " JOIN show_genres ON shows.imdb_id = show_genres.imdb_id"
+            where_clauses.append("show_genres.genre = ?")
+            params.append(genre)
+
+        if search_query:
+            where_clauses.append("LOWER(title) LIKE ?")
+            params.append(f"%{search_query.lower()}%")
+
+        if release_year:
+            where_clauses.append("release_year = ?")
+            params.append(release_year)
+
+        if country:
+            query += " JOIN show_production_countries ON shows.imdb_id = show_production_countries.imdb_id"
+            where_clauses.append("show_production_countries.country = ?")
+            params.append(country)
+
+        if show_type:
+            where_clauses.append("show_type = ?")
+            params.append(show_type)
+
+        if age_certification:
+            where_clauses.append("age_ceritification = ?")
+            params.append(age_certification)
+
+        # Combine where clauses
+        if where_clauses:
+            query += " WHERE " + " AND ".join(where_clauses)
+
+        # Limit to top 60 shows
+        query += " ORDER BY imdb_popularity DESC LIMIT 60"
+
+        # Debugging output
+        print(f"Executing query: {query} with params: {params}")
+
+        # Connect to database and execute query
+        db_conn = get_db_connection()
+        cursor = db_conn.cursor()
+        cursor.execute(query, params)
+        shows = cursor.fetchall()
+
+        # Fetch distinct genres, countries, show types, and age certifications for the dropdown filters
+        cursor.execute("SELECT DISTINCT genre FROM show_genres WHERE genre != '-' ORDER BY genre")
+        genres = [row['genre'] for row in cursor.fetchall()]
+
+        cursor.execute("SELECT DISTINCT country FROM show_production_countries WHERE country != '-' ORDER BY country")
+        countries = [row['country'] for row in cursor.fetchall()]
+
+        cursor.execute("SELECT DISTINCT show_type FROM shows ORDER BY show_type")
+        show_types = [row['show_type'] for row in cursor.fetchall()]
+
+        cursor.execute("SELECT DISTINCT age_ceritification FROM shows ORDER BY age_ceritification")
+        age_certifications = [row['age_ceritification'] for row in cursor.fetchall()]
+
+        cursor.execute("SELECT DISTINCT release_year FROM shows ORDER BY release_year DESC")
+        release_years = [row['release_year'] for row in cursor.fetchall()]
+
+    # Determine the number of results
+        result_count = len(shows)
+        result_text = f"Showing Top {min(result_count, 60)} results"
+        if result_count == 0:
+            result_text = "No show/movie found for"
+
+        if search_query:
+            result_text += f"  Search Query: '{search_query}'"
+        if genre:
+            result_text += f"  Genre: {genre}"
+        if country:
+            result_text += f" Country: {country}"
+        if release_year:
+            result_text += f" Year: {release_year}"
+        if show_type:
+            result_text += f" Type: {show_type}"
+        if age_certification:
+            result_text += f" Certification: {age_certification}"
+
+        return render_template(
+            'catalogue.html',
+            shows=shows,
+            genre_name=genre or 'All',
+            genres=genres,
+            countries=countries,
+            show_types=show_types,
+            age_certifications=age_certifications,
+            release_years=release_years,
+            result_text=result_text,
+            genre=genre,
+            country=country,
+            release_year=release_year,
+            show_type=show_type,
+            age_certification=age_certification
+        )
 
     @flask_app.route('/api/register', methods = ["POST"])
     def register_handler():

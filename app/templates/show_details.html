@@ -1,121 +1,206 @@
-{% extends '__layout__.html' %}
-{% block title %}{{show['title']}}{% endblock %}
+{% extends '__layout__.html' %} {% block title %}{{show['title']}}{% endblock %}
 {% block head %}
 <style>
-    .comment::part(label) {
-        width: 100%;
-    }
-    .comment::part(item--selected) {
-        background-color: inherit !important;
-        border-inline-start-color: #fff !important;
-    }
-    .fade-effect {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 30px;  /* Adjust as needed */
-        background: linear-gradient(to top, white, rgba(255, 255, 255, 0));  /* Fading from white to transparent */
-        display: block;
-    }
-    #actor-list-container {
-        transition: max-height 0.5s ease;
-    }
+  .comment::part(label) {
+    width: 100%;
+  }
+  .comment::part(item--selected) {
+    background-color: inherit !important;
+    border-inline-start-color: #fff !important;
+  }
+  .fade-effect {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30px; /* Adjust as needed */
+    background: linear-gradient(
+      to top,
+      white,
+      rgba(255, 255, 255, 0)
+    ); /* Fading from white to transparent */
+    display: block;
+  }
+  #actor-list-container {
+    transition: max-height 0.5s ease;
+  }
 </style>
-<sl-tree-item class="comment" style="display: none;" id="comment-template">
-    <div class="w-full">
-        <div class="flex items-center">
-            <sl-avatar class="comment-avatar" style="--size: 3rem;"></sl-avatar>
-            <div class="ms-2">
-                <p class="m-0 font-semibold comment-username-label"></p>
-                <sl-relative-time sync class="text-sm m-0 mt-1 comment-datetime"></sl-relative-time>
-            </div>
-            <div class="ms-auto flex">
-                <sl-icon-button name="reply" label="Reply" class="comment-reply-button"></sl-icon-button>
-                <sl-icon-button name="trash" label="Delete" class="comment-delete-button"></sl-icon-button>
-            </div>
-        </div>
-        <textarea readonly class="w-full rounded-md p-2 mt-2 comment-text min-h-[60px] resize-none"></textarea>
+<sl-tree-item class="comment" style="display: none" id="comment-template">
+  <div class="w-full">
+    <div class="flex items-center">
+      <sl-avatar class="comment-avatar" style="--size: 3rem"></sl-avatar>
+      <div class="ms-2">
+        <p class="m-0 font-semibold comment-username-label"></p>
+        <sl-relative-time
+          sync
+          class="text-sm m-0 mt-1 comment-datetime"
+        ></sl-relative-time>
+      </div>
+      <div class="ms-auto flex">
+        <sl-icon-button
+          name="reply"
+          label="Reply"
+          class="comment-reply-button"
+        ></sl-icon-button>
+        <sl-icon-button
+          name="trash"
+          label="Delete"
+          class="comment-delete-button"
+        ></sl-icon-button>
+      </div>
     </div>
+    <textarea
+      readonly
+      class="w-full rounded-md p-2 mt-2 comment-text min-h-[60px] resize-none"
+    ></textarea>
+  </div>
 </sl-tree-item>
 <script src="{{ url_for( 'static', filename='js/show_details_page.js' )}}"></script>
-{% endblock %}
-{% block content %}
-    <div class="max-w-[1200px] me-auto ms-auto pt-3">
-        <div class="flex">
-            <div class="w-1/4">
-                <div class="p-4 bg-white rounded-md drop-shadow-md">
-                    <img src="/api/poster/{{ show['id'] }}" alt="Movie poster" class="w-full rounded-md" style="aspect-ratio: 2/3;">
-                </div>
-            </div>
-            <div class="w-3/4 pl-4">
-                <div class="bg-white rounded-md p-4">
-                    <h1 class="text-3xl font-semibold mb-2">{{ show["title"] }}</h1>
-                    <div class="flex items-center">{% for genre in show_genres %}<a href="/genres/{{ genre['genre']}}"><sl-badge variant="neutral" pill>{{ genre['genre'] }}</sl-badge></a>{% endfor %}</div>
-                    <p class="text-gray-800 text-ellipsis w-full overflow-hidden font-semibold">{{ show["release_year"] }} • <sl-rating label="Rating" readonly value="{{ show['imdb_score'] / 2 }}" style="--symbol-size: 12px;"></sl-rating> • {{ show['age_ceritification'] }} • {{ show['show_type']}}</p>
-                    <p class="text-gray-800 text-ellipsis w-full overflow-hidden">{{ show["description"] }}</p>
-                </div>
-                <div class="bg-white rounded-md p-4 mt-4">
-                    <h1 class="text-2xl font-semibold mb-2">Directors</h1>
-                    <p class="text-gray-800">
-                        {% set directors = cast | selectattr('person_role', 'equalto', 'Director') | list %}
-                        {% if directors %}
-                            {% for person in directors %}
-                                <strong>{{ person['person_name'] }}</strong> as {{ person['character_name'] if person['character_name'] else 'Director' }}
-                                {% if not loop.last %}
-                                    •
-                                {% endif %}
-                            {% endfor %}
-                        {% else %}
-                            <em>Not Filled Yet</em>
-                        {% endif %}
-                    </p>
-                </div>
-                <div class="bg-white rounded-md p-4 mt-4">
-                    <h1 class="text-2xl font-semibold mb-2">Actors</h1>
-                    <div id="actor-list-container" class="relative" style="max-height: 100px; overflow: hidden;">
-                        <p class="text-gray-800">
-                            {% set actors = cast | selectattr('person_role', 'equalto', 'Actor') | list %}
-                            {% if actors %}
-                                {% for person in actors %}  <!-- Display all actors -->
-                                    <strong>{{ person['person_name'] }}</strong> as {{ person['character_name'] if person['character_name'] else 'N/A' }}
-                                    {% if not loop.last %}
-                                        •
-                                    {% endif %}
-                                {% endfor %}
-                            {% else %}
-                                <em>Not Filled Yet</em>
-                            {% endif %}
-                        </p>
-                        {% if actors|length > 14 %}
-                        <div id="fade-overlay" class="fade-effect"></div>
-                        {% endif %}
-                    </div>
-                    {% if actors|length > 14 %}
-                        <div class="text-center mt-4">
-                            <a href="javascript:void(0);" onclick="toggleViewMore('actor-list-container', 'fade-overlay', this)" class="text-blue-500">View More</a>
-                        </div>
-                    {% endif %}
-                </div>
-                <div class="bg-white rounded-md p-4 mt-4">
-                    {% if not current_user %}
-                    <p class="text-gray-800 text-ellipsis w-full overflow-hidden"><a href="/login" class="text-blue-500">Login</a> to leave a comment on this page.</p>
-                    {% else %}
-                    <p class="text-gray-800 text-ellipsis w-full overflow-hidden m-0 mb-1 text-sm " id="replying-info-label" style="display: none;"><sl-icon-button class="m-0" name="x-circle" label="Cancel Reply" id="cancel-reply-button"></sl-icon-button> Replying to <span class="font-semibold text-blue-500" id="replying-username"></span> comment</p>
-                    <div class="flex">
-                        <sl-textarea class="w-full min-h-[100px]" id="comment-textarea" placeholder="Leave a comment" maxlength="1024" minlength="10" resize="auto"></sl-textarea>
-                        <sl-button class="ms-2" type="primary" id="comment-button">Post<sl-icon slot="suffix" name="send"></sl-icon></sl-button>
-                    </div>
-                    <p class="text-red-500 text-xs w-full text-center m-0 mb-2 font-semibold hidden" id="comment-error-text"></p>
-                    {% endif%}
-                    <div class="border-t border-gray-300 my-3"></div>
-                    <h2 class="text-2xl font-semibold mb-2">User comments</h2>
-                    <sl-tree style="--indent-guide-width: 1px;" id="comments-container" data-showid="{{ show['id'] }}">
-                        
-                    </sl-tree>
-                    <p class="text-gray-800 text-ellipsis w-full overflow-hidden" style="display: none;" id="no-comments-label">No comments yet.</p>
-                </div>
-            </div>
-        </div>
+{% endblock %} {% block content %}
+<div class="max-w-[1200px] me-auto ms-auto pt-3">
+  <div class="flex">
+    <div class="w-1/4">
+      <div class="p-4 bg-white rounded-md drop-shadow-md">
+        <img
+          src="/api/poster/{{ show['id'] }}"
+          alt="Movie poster"
+          class="w-full rounded-md"
+          style="aspect-ratio: 2/3"
+        />
+      </div>
     </div>
+    <div class="w-3/4 pl-4">
+      <div class="bg-white rounded-md p-4">
+        <h1 class="text-3xl font-semibold mb-2">{{ show["title"] }}</h1>
+        <div class="flex items-center">
+          {% for genre in show_genres %}<a href="/genres/{{ genre['genre']}}"
+            ><sl-badge variant="neutral" pill>{{ genre['genre'] }}</sl-badge></a
+          >
+          {% endfor %}
+        </div>
+
+        <p
+          class="text-gray-800 text-ellipsis w-full overflow-hidden font-semibold"
+        >
+          {{ show["release_year"] }} •
+          <sl-rating
+            label="Rating"
+            readonly
+            value="{{ show['imdb_score'] / 2 }}"
+            style="--symbol-size: 12px"
+          ></sl-rating>
+          • {{ show['age_ceritification'] }} • {{ show['show_type']}} • Produced
+          In: {% for country in show_countries %} {{ country['country'] }} {%
+          endfor %}
+        </p>
+        <p class="text-gray-800 text-ellipsis w-full overflow-hidden">
+          {{ show["description"] }}
+        </p>
+      </div>
+      <div class="bg-white rounded-md p-4 mt-4">
+        <h1 class="text-2xl font-semibold mb-2">Directors</h1>
+        <p class="text-gray-800">
+          {% set directors = cast | selectattr('person_role', 'equalto',
+          'Director') | list %} {% if directors %} {% for person in directors %}
+          <strong>{{ person['person_name'] }}</strong> as {{
+          person['character_name'] if person['character_name'] else 'Director'
+          }} {% if not loop.last %} • {% endif %} {% endfor %} {% else %}
+          <em>Not Filled Yet</em>
+          {% endif %}
+        </p>
+      </div>
+      <div class="bg-white rounded-md p-4 mt-4">
+        <h1 class="text-2xl font-semibold mb-2">Actors</h1>
+        <div
+          id="actor-list-container"
+          class="relative"
+          style="max-height: 100px; overflow: hidden"
+        >
+          <p class="text-gray-800">
+            {% set actors = cast | selectattr('person_role', 'equalto', 'Actor')
+            | list %} {% if actors %} {% for person in actors %}
+            <!-- Display all actors -->
+            <strong>{{ person['person_name'] }}</strong> as {{
+            person['character_name'] if person['character_name'] else 'N/A' }}
+            {% if not loop.last %} • {% endif %} {% endfor %} {% else %}
+            <em>Not Filled Yet</em>
+            {% endif %}
+          </p>
+          {% if actors|length > 14 %}
+          <div id="fade-overlay" class="fade-effect"></div>
+          {% endif %}
+        </div>
+        {% if actors|length > 14 %}
+        <div class="text-center mt-4">
+          <a
+            href="javascript:void(0);"
+            onclick="toggleViewMore('actor-list-container', 'fade-overlay', this)"
+            class="text-blue-500"
+            >View More</a
+          >
+        </div>
+        {% endif %}
+      </div>
+      <div class="bg-white rounded-md p-4 mt-4">
+        {% if not current_user %}
+        <p class="text-gray-800 text-ellipsis w-full overflow-hidden">
+          <a href="/login" class="text-blue-500">Login</a> to leave a comment on
+          this page.
+        </p>
+        {% else %}
+        <p
+          class="text-gray-800 text-ellipsis w-full overflow-hidden m-0 mb-1 text-sm"
+          id="replying-info-label"
+          style="display: none"
+        >
+          <sl-icon-button
+            class="m-0"
+            name="x-circle"
+            label="Cancel Reply"
+            id="cancel-reply-button"
+          ></sl-icon-button>
+          Replying to
+          <span
+            class="font-semibold text-blue-500"
+            id="replying-username"
+          ></span>
+          comment
+        </p>
+        <div class="flex">
+          <sl-textarea
+            class="w-full min-h-[100px]"
+            id="comment-textarea"
+            placeholder="Leave a comment"
+            maxlength="1024"
+            minlength="10"
+            resize="auto"
+          ></sl-textarea>
+          <sl-button class="ms-2" type="primary" id="comment-button"
+            >Post<sl-icon slot="suffix" name="send"></sl-icon
+          ></sl-button>
+        </div>
+        <p
+          class="text-red-500 text-xs w-full text-center m-0 mb-2 font-semibold hidden"
+          id="comment-error-text"
+        ></p>
+        {% endif%}
+        <div class="border-t border-gray-300 my-3"></div>
+        <h2 class="text-2xl font-semibold mb-2">User comments</h2>
+        <sl-tree
+          style="--indent-guide-width: 1px"
+          id="comments-container"
+          data-showid="{{ show['id'] }}"
+        >
+        </sl-tree>
+        <p
+          class="text-gray-800 text-ellipsis w-full overflow-hidden"
+          style="display: none"
+          id="no-comments-label"
+        >
+          No comments yet.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
