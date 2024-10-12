@@ -67,6 +67,7 @@ CREATE TABLE show_comments (
     comment TEXT NOT NULL,
     created_at DATETIME NOT NULL,
     comment_parent_id INTEGER NULL,
+    is_deleted BOOLEAN NOT NULL DEFAULT 0,
     FOREIGN KEY (show_id) REFERENCES shows(id),
     FOREIGN KEY (user_id) REFERENCES users(uid)
 );
