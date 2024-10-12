@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width">
+        <title>{% block title %}{% endblock %} - INFMovieDB</title>
+        <link rel="stylesheet" href="{{ url_for( 'static', filename='dist/css/tailwind-build.css' )}}">
+        <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.17.1/cdn/themes/light.css" />
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.17.1/cdn/shoelace-autoloader.js"></script>
+        <!--<link rel="stylesheet" href="static/css/styles.css">-->
+        {% block head %}{% endblock %}
+    </head>
+    <body class="bg-gray-200">
+        <div class="shadow-md fixed w-full" id="global-navbar" style="z-index: 10;">
+            <div class="bg-blue-700 shadow-md text-white p-4">
+                <div class="max-w-[1200px] flex items-center ms-auto me-auto">
+                    <div class="flex items-center w-full relative">
+                        <a href="/" class="text-3xl font-semibold">INFMovieDB</a>
+                        <div class="text-gray-200">
+                            <a href="/catalogue" class="text-sm font-semibold ms-4">Catalogue</a>
+                        </div>
+                        <div class="flex items-center ms-auto text-gray-200">
+                            {% if current_user %}
+                            <p class="text-sm font-semibold me-4">{{ current_user.name }}</p>
+                            <sl-avatar image="https://www.gravatar.com/avatar/{{ gravatar_email_hash }}" label="{{current_user.name}}" style="--size: 2rem;"></sl-avatar>
+                            {% else %}
+                            <sl-button class="ms-4" type="primary" href="/login">Login</sl-button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="pt-[80px] w-full" style="min-height: 100vh;">
+            {% block content %}{% endblock %}
+        </div>
+        <footer class="min-h-[150px] bg-gray-200 p-12">
+            <h3 class="font-semibold">INFMovieDB</h3>
+        </footer>
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden z-20" id="loading-container">
+            <div class="flex items-center justify-center h-screen">
+                <div class="bg-white rounded-md p-8 border shadow-md border-gray-300">
+                    <div class="flex items-center justify-center">
+                        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
