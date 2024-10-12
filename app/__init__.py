@@ -121,6 +121,13 @@ def create_app():
         session["user_id"] = target_user.uid
         return jsonify({"success": True, "user_id": target_user.uid}), 200
 
+    @flask_app.route('/api/logout', methods=['POST'])
+    def logout_handler():
+        session.pop('user_id', None)  # Remove the user_id from the session
+        return jsonify({"success": True}), 200
+
+
+
     @flask_app.route('/api/post_comment/<int:show_id>', methods = ["POST"])
     @flask_app.route('/api/post_comment/<int:show_id>/<int:parent_comment_id>', methods = ["POST"])
     def post_comment_handler( show_id : int, parent_comment_id : int | None = None ):

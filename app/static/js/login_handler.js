@@ -25,6 +25,30 @@ document.addEventListener('DOMContentLoaded', async function() {
         return true;
     }
 
+    const logout_button = document.getElementById('logout-button');
+
+    async function logout_handler() {
+        const response = await fetch('/api/logout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (response.status === 200) {
+            // Successfully logged out, redirect to home or login page
+            window.location.href = '/';  // Change this to your desired redirect page
+        } else {
+            const data = await response.json();
+            alert("Logout failed: " + data.error); // Optional: Show an error message
+        }
+    }
+
+    // Attach the event listener for the logout button
+    if (logout_button) {
+        logout_button.addEventListener('click', logout_handler);
+    }
+
     async function login_handler() {
         if (!await validate_input()) {
             return;

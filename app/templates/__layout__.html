@@ -9,8 +9,10 @@
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.17.1/cdn/themes/light.css" />
         <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.17.1/cdn/shoelace-autoloader.js"></script>
+        <script src="{{ url_for( 'static', filename='js/logout_handler.js' )}}"></script>
         <!--<link rel="stylesheet" href="static/css/styles.css">-->
-        {% block head %}{% endblock %}
+        {% block head %}
+        {% endblock %}
     </head>
     <body class="bg-gray-200" {% if current_user %}data-authenticated-user-id="{{ current_user.uid }}"{%else%}data-authenticated-user-id="-1"{% endif %}>
         <div class="shadow-md fixed w-full" id="global-navbar" style="z-index: 10;">
@@ -25,8 +27,10 @@
                             {% if current_user %}
                             <p class="text-sm font-semibold me-2">{{ current_user.name }}</p>
                             <sl-avatar image="https://www.gravatar.com/avatar/{{ gravatar_email_hash }}&d=retro" label="{{current_user.name}}" style="--size: 2rem;"></sl-avatar>
+                            <sl-button class="ms-4" type="primary" id="logout-button">Logout</sl-button>
                             {% else %}
                             <sl-button class="ms-4" type="primary" href="/login">Login</sl-button>
+                            <sl-button class="ms-4" type="primary" href="/register">Register</sl-button>
                             {% endif %}
                         </div>
                     </div>
