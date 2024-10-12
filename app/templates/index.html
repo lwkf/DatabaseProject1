@@ -51,7 +51,7 @@
         <div class="movies-container">
             {% for show in shows %}
             <a href="/shows/{{show['id']}}/--" class="movie-card drop-shadow-md">
-                <img src="https://m.media-amazon.com/images/M/MV5BNThiZjA3MjItZGY5Ni00ZmJhLWEwN2EtOTBlYTA4Y2E0M2ZmXkEyXkFqcGc@._V1_FMjpg_UY1929_.jpg" alt="Movie poster" class="w-full">
+                <img src="/api/poster/{{ show['id'] }}" alt="Movie poster" class="w-full">
                 <div class="movie-card-details">
                     <h3 class="font-semibold">{{ show["title"] }}</h3>
                     <p class="text-gray-300 text-ellipsis w-full overflow-hidden">{{ show["release_year"] }} • <sl-rating label="Rating" readonly value="{{ show['imdb_score'] / 2 }}" style="--symbol-size: 12px;"></sl-rating></p>

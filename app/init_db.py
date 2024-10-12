@@ -26,9 +26,10 @@ def init_db():
             imdb_id = row["imdb_id"]
             if imdb_id == "Unknown":
                 continue # Too lazy to handle this
+            imdb_popularity = round( float(row["imdb_score"]) * float(row["imdb_votes"]) )
             cursor.execute(
-        """INSERT INTO shows (title, show_type, description, release_year, age_ceritification, show_runtime_minutes, seasons, imdb_id, imdb_score, imdb_votes, tmdb_popularity, tmdb_score)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""", (row["title"], row["type"], row["description"], row["release_year"], row["age_certification"], row["runtime"], row["seasons"], row["imdb_id"], row["imdb_score"], row["imdb_votes"], row["tmdb_popularity"], row["tmdb_score"]))
+        """INSERT INTO shows (title, show_type, description, release_year, age_ceritification, show_runtime_minutes, seasons, imdb_id, imdb_score, imdb_votes, tmdb_popularity, tmdb_score, imdb_popularity)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""", (row["title"], row["type"], row["description"], row["release_year"], row["age_certification"], row["runtime"], row["seasons"], row["imdb_id"], row["imdb_score"], row["imdb_votes"], row["tmdb_popularity"], row["tmdb_score"], imdb_popularity))
             show_genre = row["genres"].split(", ")
             for genre in show_genre:
                 cursor.execute(

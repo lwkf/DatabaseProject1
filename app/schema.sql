@@ -39,9 +39,12 @@ CREATE TABLE shows (
     imdb_score REAL NOT NULL,
     imdb_votes INTEGER NOT NULL,
     tmdb_popularity FLOAT NOT NULL,
-    tmdb_score FLOAT NOT NULL
+    tmdb_score FLOAT NOT NULL,
+    imdb_popularity BIGINT NOT NULL DEFAULT 0,
+    show_poster_url TEXT NULL
 );
 CREATE INDEX imdb_score_index ON shows (imdb_score);
+CREATE INDEX imdb_popularity_index ON shows (imdb_popularity);
 
 DROP TABLE IF EXISTS show_genres;
 CREATE TABLE show_genres (

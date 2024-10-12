@@ -7,6 +7,7 @@ from datetime import datetime
 from app.init_db import init_db
 from app.utils import get_db_connection
 from app.services.authentication import is_username_taken, is_email_in_use, create_user, get_current_user, verify_password, user_model, get_user_by_email, get_user_model_by_id
+from app.services.poster_fetching import get_poster_for_show
 
 from config import Config
 web_config = Config()
@@ -22,7 +23,7 @@ def create_app():
     def home_page():
         db_conn = get_db_connection()
         cursor = db_conn.cursor()
-        cursor.execute("SELECT * FROM shows ORDER BY tmdb_popularity DESC LIMIT 45")
+        cursor.execute("SELECT * FROM shows ORDER BY imdb_popularity DESC LIMIT 45")
         shows = cursor.fetchall()
         return render_template("index.html", shows = shows)
 
@@ -217,6 +218,19 @@ def create_app():
         recursively_delete(comment_id)
         db_conn.commit()
         return jsonify({"success": True}), 200
+
+    @flask_app.route("/api/poster/<int:show_id>", methods = ["GET"])
+    def get_poster_image( show_id : int ):
+        db_conn = get_db_connection()
+        cursor = db_conn.cursor()
+        cursor.execute("SELECT * FROM shows WHERE id = ?", (show_id,))
+        show = cursor.fetchone()
+        if show is None:
+            return jsonify({"error": "Show not found", "success": False}), 404
+        poster_url = get_poster_for_show(show_id)
+        if poster_url is None:
+            return redirect("https://placehold.co/1299x1929")
+        return redirect(poster_url)
 
     @flask_app.before_request
     def before_request():

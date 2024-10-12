@@ -1,0 +1,3 @@
+class Config():
+    FLASK_SESSION_KEY = "EXAMPLEKEY"
+    THEMOVIEDB_API_KEY = "" # Free service https://www.themoviedb.org/
