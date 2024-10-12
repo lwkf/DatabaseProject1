@@ -2,7 +2,8 @@ import os
 import slugify
 import re
 import hashlib
-from flask import Flask, render_template, request, jsonify, g, session, redirect, abort
+import urllib.parse
+from flask import Flask, render_template, request, jsonify, g, session, redirect, abort, url_for, request
 from datetime import datetime
 from app.init_db import init_db
 from app.utils import get_db_connection
@@ -87,7 +88,9 @@ def create_app():
             return redirect(f"/shows/{show_id}/{expected_slug}")
         
         show_genres = cursor.execute("SELECT genre FROM show_genres WHERE imdb_id = ?", (show['imdb_id'],)).fetchall()
-        return render_template("show_details.html", show = show, show_genres = show_genres)
+        cast = cursor.execute("SELECT person_name, character_name, person_role FROM credits WHERE title_id = ?", (show['title_id'],)).fetchall()
+        show_countries = cursor.execute("SELECT country FROM show_production_countries WHERE imdb_id = ?", (show['imdb_id'],)).fetchall()
+        return render_template("show_details.html", show = show, show_genres = show_genres, cast = cast, show_countries=show_countries)
 
     @flask_app.route('/genres/<genre_name>', methods = ["GET"])
     def genre_page(genre_name : str):
@@ -97,6 +100,131 @@ def create_app():
         cursor.execute("SELECT * FROM shows JOIN show_genres ON shows.imdb_id = show_genres.imdb_id WHERE show_genres.genre = ? ORDER BY imdb_popularity DESC LIMIT 60", (genre_name,))
         shows = cursor.fetchall()
         return render_template("genre_page.html", genre_name = genre_name, shows = shows)
+    
+    @flask_app.route('/catalogue', methods=["GET"])
+    def catalogue_page():
+        genre = request.args.get('genre')  # Genre filter
+        search_query = request.args.get('query')  # Search query
+        release_year = request.args.get('release_year')  # Release year filter
+        country = request.args.get('country')  # Country filter
+        show_type = request.args.get('show_type')  # Show type filter
+        age_certification = request.args.get('age_certification')  # Age certification filter
+
+        # Construct a dictionary of non-empty filters
+        query_params = {
+            "genre": genre,
+            "query": search_query,
+            "release_year": release_year,
+            "country": country,
+            "show_type": show_type,
+            "age_certification": age_certification
+        }
+
+        # Remove keys with empty values
+        query_params = {k: v for k, v in query_params.items() if v}
+
+        # If current request URL doesn't match the cleaned parameters, redirect to the new URL
+        current_query_string = urllib.parse.urlencode(query_params)
+        if request.query_string.decode('utf-8') != current_query_string:
+            return redirect(f"{url_for('catalogue_page')}?{current_query_string}")
+
+        query = "SELECT * FROM shows"
+        params = []
+
+        # Adding filters to the query
+        where_clauses = []
+        if genre:
+            query += " JOIN show_genres ON shows.imdb_id = show_genres.imdb_id"
+            where_clauses.append("show_genres.genre = ?")
+            params.append(genre)
+
+        if search_query:
+            where_clauses.append("LOWER(title) LIKE ?")
+            params.append(f"%{search_query.lower()}%")
+
+        if release_year:
+            where_clauses.append("release_year = ?")
+            params.append(release_year)
+
+        if country:
+            query += " JOIN show_production_countries ON shows.imdb_id = show_production_countries.imdb_id"
+            where_clauses.append("show_production_countries.country = ?")
+            params.append(country)
+
+        if show_type:
+            where_clauses.append("show_type = ?")
+            params.append(show_type)
+
+        if age_certification:
+            where_clauses.append("age_ceritification = ?")
+            params.append(age_certification)
+
+        # Combine where clauses
+        if where_clauses:
+            query += " WHERE " + " AND ".join(where_clauses)
+
+        # Limit to top 60 shows
+        query += " ORDER BY imdb_popularity DESC LIMIT 60"
+
+        # Debugging output
+        print(f"Executing query: {query} with params: {params}")
+
+        # Connect to database and execute query
+        db_conn = get_db_connection()
+        cursor = db_conn.cursor()
+        cursor.execute(query, params)
+        shows = cursor.fetchall()
+
+        # Fetch distinct genres, countries, show types, and age certifications for the dropdown filters
+        cursor.execute("SELECT DISTINCT genre FROM show_genres WHERE genre != '-' ORDER BY genre")
+        genres = [row['genre'] for row in cursor.fetchall()]
+
+        cursor.execute("SELECT DISTINCT country FROM show_production_countries WHERE country != '-' ORDER BY country")
+        countries = [row['country'] for row in cursor.fetchall()]
+
+        cursor.execute("SELECT DISTINCT show_type FROM shows ORDER BY show_type")
+        show_types = [row['show_type'] for row in cursor.fetchall()]
+
+        cursor.execute("SELECT DISTINCT age_ceritification FROM shows ORDER BY age_ceritification")
+        age_certifications = [row['age_ceritification'] for row in cursor.fetchall()]
+
+        cursor.execute("SELECT DISTINCT release_year FROM shows ORDER BY release_year DESC")
+        release_years = [row['release_year'] for row in cursor.fetchall()]
+
+    # Determine the number of results
+        result_count = len(shows)
+        result_text = f"Showing Top {min(result_count, 60)} results"
+        if result_count == 0:
+            result_text = "No show/movie found for"
+        if search_query:
+            result_text += f"  Search Query: '{search_query}'"
+        if genre:
+            result_text += f"  Genre: {genre}"
+        if country:
+            result_text += f" Country: {country}"
+        if release_year:
+            result_text += f" Year: {release_year}"
+        if show_type:
+            result_text += f" Type: {show_type}"
+        if age_certification:
+            result_text += f" Certification: {age_certification}"
+
+        return render_template(
+            'catalogue.html',
+            shows=shows,
+            genre_name=genre or 'All',
+            genres=genres,
+            countries=countries,
+            show_types=show_types,
+            age_certifications=age_certifications,
+            release_years=release_years,
+            result_text=result_text,
+            genre=genre,
+            country=country,
+            release_year=release_year,
+            show_type=show_type,
+            age_certification=age_certification
+        )
 
     @flask_app.route('/api/register', methods = ["POST"])
     def register_handler():
@@ -158,7 +286,31 @@ def create_app():
         session.pop('user_id', None)  # Remove the user_id from the session
         return jsonify({"success": True}), 200
 
+    @flask_app.route('/profile')
+    def profile():
+        current_user = get_current_user()
+        db_conn = get_db_connection()
+        cursor = db_conn.cursor()
+        # Fetch user comments from the database
+        cursor.execute('''
+            SELECT c.comment, c.created_at, c.show_id, c.is_deleted, s.title 
+            FROM show_comments c 
+            JOIN shows s ON c.show_id = s.id 
+            WHERE c.user_id = ?
+            ORDER BY c.created_at DESC
+        ''', (current_user.uid,))
 
+        comments = cursor.fetchall()  # Fetch all comments for the current user
+
+        formatted_comments = [{
+            'comment': comment['comment'],
+            'created_at': datetime.strptime(comment['created_at'], "%Y-%m-%d %H:%M:%S.%f").strftime("%B %d, %Y, %I:%M %p"),
+            'title': comment['title'],
+            'show_id': comment['show_id'],
+            'is_deleted': comment['is_deleted']
+        } for comment in comments]
+
+        return render_template('userProfile.html', user=current_user, comments=formatted_comments)
 
     @flask_app.route('/api/post_comment/<int:show_id>', methods = ["POST"])
     @flask_app.route('/api/post_comment/<int:show_id>/<int:parent_comment_id>', methods = ["POST"])
@@ -189,7 +341,7 @@ def create_app():
                 return jsonify({"error": "Parent comment does not belong to this show", "success": False}), 400
         cursor.execute(
             "INSERT INTO show_comments (show_id, user_id, comment, created_at, comment_parent_id) VALUES (?, ?, ?, ?, ?)",
-            (show_id, get_current_user().uid, request.json["content"], datetime.utcnow(), parent_comment_id)
+            (show_id, get_current_user().uid, request.json["content"], datetime.now(), parent_comment_id)
         )
         db_conn.commit()
         comment_id = cursor.lastrowid
@@ -238,13 +390,14 @@ def create_app():
                     "gravatar_hash": hashlib.sha256((user_poster.email.lower().strip()).encode("utf-8")).hexdigest()
                 },
                 "content": comment["comment"],
-                "created_at": f"{comment['created_at']}-00:00",
-                "total_children": total_children
+                "created_at": datetime.strptime(comment['created_at'], "%Y-%m-%d %H:%M:%S.%f").strftime("%B %d, %Y, %I:%M %p"),
+                "total_children": total_children,
+                "is_deleted": comment["is_deleted"]
             })
             
         return jsonify({"success": True, "comments": serialized_comments}), 200
 
-    @flask_app.route("/api/delete_comment/<int:comment_id>", methods = ["DELETE"])
+    @flask_app.route("/api/delete_comment/<int:comment_id>", methods = ["UPDATE"])
     def delete_comment_handler( comment_id : int ):
         if get_current_user() is None:
             return jsonify({"error": "Not logged in", "success": False}), 401
@@ -257,13 +410,10 @@ def create_app():
         if comment["user_id"] != get_current_user().uid:
             return jsonify({"error": "Not authorized to delete this comment", "success": False}), 403
         
-        def recursively_delete( comment_id : int ):
-            cursor.execute("SELECT * FROM show_comments WHERE comment_parent_id = ?", (comment_id,))
-            children = cursor.fetchall()
-            for child in children:
-                recursively_delete(child["id"])
-            cursor.execute("DELETE FROM show_comments WHERE id = ?", (comment_id,))
-        recursively_delete(comment_id)
+        def pseudo_del_comment( comment_id : int ):
+            cursor.execute("UPDATE show_comments SET comment = '[deleted]', is_deleted = 'TRUE' WHERE id = ?", (comment_id,))
+
+        pseudo_del_comment(comment_id)
         db_conn.commit()
         return jsonify({"success": True}), 200
 
