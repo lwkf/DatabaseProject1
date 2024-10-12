@@ -9,6 +9,18 @@
         background-color: inherit !important;
         border-inline-start-color: #fff !important;
     }
+    .fade-effect {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 30px;  /* Adjust as needed */
+        background: linear-gradient(to top, white, rgba(255, 255, 255, 0));  /* Fading from white to transparent */
+        display: block;
+    }
+    #actor-list-container {
+        transition: max-height 0.5s ease;
+    }
 </style>
 <sl-tree-item class="comment" style="display: none;" id="comment-template">
     <div class="w-full">
@@ -42,6 +54,48 @@
                     <div class="flex items-center">{% for genre in show_genres %}<a href="/genres/{{ genre['genre']}}"><sl-badge variant="neutral" pill>{{ genre['genre'] }}</sl-badge></a>{% endfor %}</div>
                     <p class="text-gray-800 text-ellipsis w-full overflow-hidden font-semibold">{{ show["release_year"] }} • <sl-rating label="Rating" readonly value="{{ show['imdb_score'] / 2 }}" style="--symbol-size: 12px;"></sl-rating> • {{ show['age_ceritification'] }} • {{ show['show_type']}}</p>
                     <p class="text-gray-800 text-ellipsis w-full overflow-hidden">{{ show["description"] }}</p>
+                </div>
+                <div class="bg-white rounded-md p-4 mt-4">
+                    <h1 class="text-2xl font-semibold mb-2">Directors</h1>
+                    <p class="text-gray-800">
+                        {% set directors = cast | selectattr('person_role', 'equalto', 'Director') | list %}
+                        {% if directors %}
+                            {% for person in directors %}
+                                <strong>{{ person['person_name'] }}</strong> as {{ person['character_name'] if person['character_name'] else 'Director' }}
+                                {% if not loop.last %}
+                                    •
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <em>Not Filled Yet</em>
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="bg-white rounded-md p-4 mt-4">
+                    <h1 class="text-2xl font-semibold mb-2">Actors</h1>
+                    <div id="actor-list-container" class="relative" style="max-height: 100px; overflow: hidden;">
+                        <p class="text-gray-800">
+                            {% set actors = cast | selectattr('person_role', 'equalto', 'Actor') | list %}
+                            {% if actors %}
+                                {% for person in actors %}  <!-- Display all actors -->
+                                    <strong>{{ person['person_name'] }}</strong> as {{ person['character_name'] if person['character_name'] else 'N/A' }}
+                                    {% if not loop.last %}
+                                        •
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <em>Not Filled Yet</em>
+                            {% endif %}
+                        </p>
+                        {% if actors|length > 14 %}
+                        <div id="fade-overlay" class="fade-effect"></div>
+                        {% endif %}
+                    </div>
+                    {% if actors|length > 14 %}
+                        <div class="text-center mt-4">
+                            <a href="javascript:void(0);" onclick="toggleViewMore('actor-list-container', 'fade-overlay', this)" class="text-blue-500">View More</a>
+                        </div>
+                    {% endif %}
                 </div>
                 <div class="bg-white rounded-md p-4 mt-4">
                     {% if not current_user %}

@@ -11,23 +11,13 @@ CREATE TABLE users (
     admin_permissions BIGINT NOT NULL DEFAULT 0
 );
 
--- Drop the credits table if it already exists
-DROP TABLE IF EXISTS credits;
-
--- Create a new Credits table
--- CREATE TABLE credits (
-    
--- );
-
--- Initial data
-
-
 -- Drop the shows table if it already exists
 DROP TABLE IF EXISTS shows;
 
 -- Create a new shows table
 CREATE TABLE shows (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title_id TEXT NOT NULL,
     title TEXT NOT NULL,
     description TEXT NOT NULL,
     show_type TEXT NOT NULL,
@@ -45,6 +35,20 @@ CREATE TABLE shows (
 );
 CREATE INDEX imdb_score_index ON shows (imdb_score);
 CREATE INDEX imdb_popularity_index ON shows (imdb_popularity);
+
+-- Drop the credits table if it already exists
+DROP TABLE IF EXISTS credits;
+
+-- Create a new Credits table
+CREATE TABLE credits (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    person_id INTEGER NOT NULL,
+    title_id TEXT NOT NULL,
+    person_name TEXT NOT NULL,
+    character_name TEXT NULL,
+    person_role TEXT NOT NULL CHECK(person_role IN ('Actor', 'Director')),
+    FOREIGN KEY (title_id) REFERENCES shows(title_id)
+);
 
 DROP TABLE IF EXISTS show_genres;
 CREATE TABLE show_genres (

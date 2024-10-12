@@ -55,7 +55,8 @@ def create_app():
             return redirect(f"/shows/{show_id}/{expected_slug}")
         
         show_genres = cursor.execute("SELECT genre FROM show_genres WHERE imdb_id = ?", (show['imdb_id'],)).fetchall()
-        return render_template("show_details.html", show = show, show_genres = show_genres)
+        cast = cursor.execute("SELECT person_name, character_name, person_role FROM credits WHERE title_id = ?", (show['title_id'],)).fetchall()
+        return render_template("show_details.html", show = show, show_genres = show_genres, cast = cast)
 
     @flask_app.route('/genres/<genre_name>', methods = ["GET"])
     def genre_page(genre_name : str):

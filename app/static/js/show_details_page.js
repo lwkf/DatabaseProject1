@@ -14,6 +14,21 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     var selected_comment = null;
 
+    function toggleViewMore(containerId, overlayId, link) {
+        var container = document.getElementById(containerId);
+        var overlay = document.getElementById(overlayId);
+        
+        if (container.style.maxHeight === "100px" || container.style.maxHeight === "") {  
+            container.style.maxHeight = container.scrollHeight + "px";  
+            if (overlay) overlay.style.display = "none";  
+            link.innerHTML = "View Less";  
+        } else {  
+            container.style.maxHeight = "100px";  
+            if (overlay) overlay.style.display = "block";  
+            link.innerHTML = "View More";  
+        }
+    }
+    
     async function buildComment( comment_data, parent_element ) {
         if ( document.getElementById(`comment-${comment_data.id}`) ) {
             return;

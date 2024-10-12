@@ -28,8 +28,8 @@ def init_db():
                 continue # Too lazy to handle this
             imdb_popularity = round( float(row["imdb_score"]) * float(row["imdb_votes"]) )
             cursor.execute(
-        """INSERT INTO shows (title, show_type, description, release_year, age_ceritification, show_runtime_minutes, seasons, imdb_id, imdb_score, imdb_votes, tmdb_popularity, tmdb_score, imdb_popularity)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""", (row["title"], row["type"], row["description"], row["release_year"], row["age_certification"], row["runtime"], row["seasons"], row["imdb_id"], row["imdb_score"], row["imdb_votes"], row["tmdb_popularity"], row["tmdb_score"], imdb_popularity))
+        """INSERT INTO shows (title_id, title, show_type, description, release_year, age_ceritification, show_runtime_minutes, seasons, imdb_id, imdb_score, imdb_votes, tmdb_popularity, tmdb_score, imdb_popularity)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", (row["id"], row["title"], row["type"], row["description"], row["release_year"], row["age_certification"], row["runtime"], row["seasons"], row["imdb_id"], row["imdb_score"], row["imdb_votes"], row["tmdb_popularity"], row["tmdb_score"], imdb_popularity))
             show_genre = row["genres"].split(", ")
             for genre in show_genre:
                 cursor.execute(
@@ -40,5 +40,14 @@ def init_db():
                 cursor.execute(
                     """INSERT INTO show_production_countries (imdb_id, country) VALUES (?,?)""", (imdb_id, country)
                 )
+
+    with open("./movie_credits.csv", "r", encoding="utf8") as f:
+        credits_reader = csv.DictReader(f)
+        for row in credits_reader:
+            cursor.execute(
+                """INSERT INTO credits (person_id, title_id, person_name, character_name, person_role)
+                   VALUES (?,?,?,?,?)""",
+                (row["person_id"], row["id"], row["name"], row["character"], row["role"])
+            )
 
     conn.commit()
