@@ -89,6 +89,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
         if (comments_data['comments'].length === 0) {
             no_comments_label.style.display = 'block';
+        } else {
+            no_comments_label.style.display = 'none';
         }
     }
     fetch_show_comments();

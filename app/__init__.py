@@ -57,6 +57,15 @@ def create_app():
         show_genres = cursor.execute("SELECT genre FROM show_genres WHERE imdb_id = ?", (show['imdb_id'],)).fetchall()
         return render_template("show_details.html", show = show, show_genres = show_genres)
 
+    @flask_app.route('/genres/<genre_name>', methods = ["GET"])
+    def genre_page(genre_name : str):
+        genre_name = genre_name.lower()
+        db_conn = get_db_connection()
+        cursor = db_conn.cursor()
+        cursor.execute("SELECT * FROM shows JOIN show_genres ON shows.imdb_id = show_genres.imdb_id WHERE show_genres.genre = ? ORDER BY imdb_popularity DESC LIMIT 60", (genre_name,))
+        shows = cursor.fetchall()
+        return render_template("genre_page.html", genre_name = genre_name, shows = shows)
+
     @flask_app.route('/api/register', methods = ["POST"])
     def register_handler():
         if not request.is_json:
@@ -229,7 +238,7 @@ def create_app():
             return jsonify({"error": "Show not found", "success": False}), 404
         poster_url = get_poster_for_show(show_id)
         if poster_url is None:
-            return redirect("https://placehold.co/1299x1929")
+            return redirect("https://placehold.co/780x1170")
         return redirect(poster_url)
 
     @flask_app.before_request

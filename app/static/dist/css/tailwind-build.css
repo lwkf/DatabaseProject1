@@ -671,6 +671,10 @@ video {
   min-height: 100px;
 }
 
+.min-h-\[60px\] {
+  min-height: 60px;
+}
+
 .w-12 {
   width: 3rem;
 }

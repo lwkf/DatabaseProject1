@@ -25,13 +25,13 @@ def get_poster_for_show( show_id : int ) -> str | None:
             return None
         response_json = response.json()
         if len( response_json["movie_results"] ) == 0 and len( response_json["tv_results"] ) == 0:
+            poster_url = "https://placehold.co/780x1170"
             return None
-        result = response_json["movie_results"][0] if len( response_json["movie_results"] ) > 0 else response_json["tv_results"][0]
-        poster_url = f"https://image.tmdb.org/t/p/w780{ result['poster_path'] }"
+        else:
+            result = response_json["movie_results"][0] if len( response_json["movie_results"] ) > 0 else response_json["tv_results"][0]
+            poster_url = f"https://image.tmdb.org/t/p/w780{ result['poster_path'] }"
         cursor.execute("UPDATE shows SET show_poster_url = ? WHERE id = ?", (poster_url, show_id))
         db_conn.commit()
-        
         return poster_url
     except Exception as e:
-        print(e)
         return None

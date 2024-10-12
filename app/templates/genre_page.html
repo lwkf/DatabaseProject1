@@ -1,5 +1,5 @@
 {% extends '__layout__.html' %}
-{% block title %}Home{% endblock %}
+{% block title %}{{genre_name}}{% endblock %}
 {% block head %}
     <style>
         .movies-container {
@@ -38,16 +38,11 @@
         .movie-card-details p {
             font-size: 0.8rem;
         }
-
-        .movie-card:first-child,
-        .movie-card:nth-child(2),
-        .movie-card:nth-child(3) {
-            grid-column: span 2;
-        }
     </style>
 {% endblock %}
 {% block content %}
     <div class="max-w-[1200px] me-auto ms-auto pt-3">
+        <h3 class="text-2xl font-semibold mb-2">Showing Top 60 results for '{{genre_name}}'</h3>
         <div class="movies-container">
             {% for show in shows %}
             <a href="/shows/{{show['id']}}/--" class="movie-card drop-shadow-md">
