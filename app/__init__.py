@@ -19,6 +19,38 @@ def create_app():
     
     if not os.path.exists("./database.db"):
         init_db()
+
+    @flask_app.route("/api/delete_movie/<int:show_id>", methods=["DELETE"])
+    def delete_movie_handler(show_id: int):
+        current_user = get_current_user()
+        if current_user is None:
+            return jsonify({"error": "Not logged in", "success": False}), 401
+        if current_user.admin_permissions != 0xFFFFFFFF:
+            return jsonify({"error": "Not authorized to delete movies", "success": False}), 403
+
+        db_conn = get_db_connection()
+        cursor = db_conn.cursor()
+        # Fetch the show using the primary key 'id'
+        cursor.execute("SELECT * FROM shows WHERE id = ?", (show_id,))
+        show = cursor.fetchone()
+        if show is None:
+            return jsonify({"error": "Show not found", "success": False}), 404
+
+        imdb_id = show["imdb_id"]
+
+        # Delete the movie from the shows table
+        cursor.execute("DELETE FROM shows WHERE id = ?", (show_id,))
+        # Delete associated genres
+        cursor.execute("DELETE FROM show_genres WHERE imdb_id = ?", (imdb_id,))
+        # Delete associated production countries
+        cursor.execute("DELETE FROM show_production_countries WHERE imdb_id = ?", (imdb_id,))
+        # Delete associated comments
+        cursor.execute("DELETE FROM show_comments WHERE show_id = ?", (show_id,))
+        db_conn.commit()
+
+        return jsonify({"success": True}), 200
+
+
     
     @flask_app.route('/', methods = ["GET"])
     def home_page():
