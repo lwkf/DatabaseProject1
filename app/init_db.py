@@ -59,4 +59,16 @@ def init_db():
                 (row["person_id"], row["id"], row["name"], row["character"], row["role"])
             )
 
+    def create_preset_comments(): 
+        cursor.execute(
+            """INSERT INTO show_comments (show_id, user_id, comment, created_at) VALUES (?,?,?,?)""",
+            (229, 1, "This is a test parent comment", datetime.now())
+        )
+        cursor.execute(
+            """INSERT INTO show_comments (show_id, user_id, comment, created_at, comment_parent_id) VALUES (?,?,?,?,?)""",
+            (229, 2, "This is a test child comment", datetime.now(), 1)
+        )
+        print("Created preset comments at show_id: 229. Should be Inception.")
+    create_preset_comments()
+
     conn.commit()

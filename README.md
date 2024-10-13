@@ -22,6 +22,11 @@ Install the dependencies and libraries our app requires.
 pip install -r requirements.txt
 ```
 
+### Start Up Notes:
+When the app runs for the first time, it checks whether "database.db" exists.
+
+If it does not exist, it runs "init_db.py" which runs "schema.sql" and inserts the contents of "movie_data.csv" and "movie_credits.csv". It will also create 2 accounts, 1 with admin permissions and the other without. Along side, it will create 2 dummy comments under the movie "Inception".
+
 ## Step 2: Run App
 Find and run the file "run_debug_flask.cmd"
 

@@ -46,7 +46,7 @@ block head %}
 <form method="GET" action="/catalogue" class="mb-4">
   <div class="container mx-auto flex-wrap items-center grid grid-cols-12">
     <!-- Search Bar -->
-    <sl-input class="col-span-4" type="text" name="query" placeholder="Search for movies or shows..." value="{{ request.args.get('query', '') }}"/></sl-input>
+    <sl-input class="col-span-3" type="text" name="query" placeholder="Search for movies or shows..." value="{{ request.args.get('query', '') }}"/></sl-input>
 
     <!-- Genre Dropdown -->
     <sl-select class="col-span-2" name="genre">
@@ -69,7 +69,7 @@ block head %}
     </sl-select>
 
     <!-- Country Filter -->
-    <sl-select class="col-span-1" name="country">
+    <sl-select class="col-span-2" name="country">
       <sl-option value="">All Countries</sl-option>
       {% for country in countries %}
       <sl-option value="{{ country }}" {% if request.args.get('country')==country %}selected{% endif %}>
@@ -98,7 +98,7 @@ block head %}
       {% endfor %}
     </sl-select>
     <!-- Submit Button -->
-    <sl-button class="col-span-1" type="submit">
+    <sl-button class="col-span-1" variant="primary" type="submit">
       Search
     </sl-button>
   </div>
@@ -106,8 +106,6 @@ block head %}
 <div class="max-w-[1200px] me-auto ms-auto pt-3">
   <h3 class="text-2xl font-semibold mb-2">
     {{ result_text }}
-
-
     <div class="movies-container">
       {% for show in shows %}
       <a href="/shows/{{show['id']}}/--" class="movie-card drop-shadow-md">
