@@ -52,6 +52,7 @@ CREATE TABLE credits (
 
 DROP TABLE IF EXISTS show_genres;
 CREATE TABLE show_genres (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     imdb_id TEXT NOT NULL,
     genre TEXT NOT NULL,
     FOREIGN KEY (imdb_id) REFERENCES shows(imdb_id)
@@ -60,6 +61,7 @@ CREATE INDEX show_genres_imdb_id_index ON show_genres (imdb_id);
 
 DROP TABLE IF EXISTS show_production_countries;
 CREATE TABLE show_production_countries (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     imdb_id TEXT NOT NULL,
     country TEXT NOT NULL,
     FOREIGN KEY (imdb_id) REFERENCES shows(imdb_id)

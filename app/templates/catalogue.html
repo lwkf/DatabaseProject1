@@ -1,131 +1,127 @@
 <!-- Will be able to show all available shows, sortable by details (release year, iMDb score, etc.) -->{%
-    extends '__layout__.html' %} {% block title %}{{genre_name}}{% endblock %} {%
-        block head %}
-        <style>
-          .movies-container {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 1rem;
-            grid-auto-rows: auto;
-            margin-bottom: 2rem;
-            text-decoration: none;
-          }
-        
-          .movie-card {
-            position: relative;
-            overflow: hidden;
-            border-radius: 0.5rem;
-            color: white;
-            transition: 0.15s;
-          }
-          .movie-card:hover {
-            transform: scale(1.05);
-          }
-          .movie-card-details {
-            position: absolute;
-            bottom: -94px;
-            left: 0;
-            right: 0;
-            padding: 16px;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0));
-            padding-top: 30px;
-            transition: 0.15s;
-          }
-        
-          .movie-card:hover .movie-card-details {
-            bottom: 0;
-          }
-          .movie-card-details p {
-            font-size: 0.8rem;
-          }
-        </style>
-        {% endblock %} {% block content %}
-        <form method="GET" action="/catalogue" class="mb-4">
-            <div class="flex gap-2">
-              <!-- Search Bar -->
-              <input
-                type="text"
-                name="query"
-                placeholder="Search for movies or shows..."
-                class="p-2 border rounded w-3/4"
-                value="{{ request.args.get('query', '') }}"
-              />
-          
-          
-              <!-- Genre Dropdown -->
-              <select name="genre" class="p-2 border rounded">
-                <option value="">All Genres</option>
-                {% for genre in genres %}
-                <option value="{{ genre }}" {% if request.args.get('genre') == genre %}selected{% endif %}>{{ genre }}</option>
-                {% endfor %}
-              </select>
-          
-              <!-- Release Year Filter -->
-              <select name="release_year" class="p-2 border rounded">
-                <option value="">All Years</option>
-                {% for year in release_years %}
-                <option value="{{ year }}" {% if request.args.get('release_year') == year|string %}selected{% endif %}>{{ year }}</option>
-                {% endfor %}
-              </select>
-          
-              <!-- Country Filter -->
-              <select name="country" class="p-2 border rounded">
-                <option value="">All Countries</option>
-                {% for country in countries %}
-                <option value="{{ country }}" {% if request.args.get('country') == country %}selected{% endif %}>{{ country }}</option>
-                {% endfor %}
-              </select>
-          
-              <!-- Show Type Filter -->
-              <select name="show_type" class="p-2 border rounded">
-                <option value="">All Types</option>
-                {% for show_type in show_types %}
-                <option value="{{ show_type }}" {% if request.args.get('show_type') == show_type %}selected{% endif %}>{{ show_type }}</option>
-                {% endfor %}
-              </select>
-          
-              <!-- Age Certification Filter -->
-              <select name="age_certification" class="p-2 border rounded">
-                <option value="">All Certifications</option>
-                {% for age in age_certifications %}
-                <option value="{{ age }}" {% if request.args.get('age_certification') == age %}selected{% endif %}>{{ age }}</option>
-                {% endfor %}
-              </select>
-              <!-- Submit Button -->
-              <button type="submit" class="p-2 text-white rounded" style="background-color: #0000FF;">
-                Search
-              </button>
-            </div>
-          </form>
-        <div class="max-w-[1200px] me-auto ms-auto pt-3">
-            <h3 class="text-2xl font-semibold mb-2">
-                {{ result_text }} 
-        
-              
-          <div class="movies-container">
-            {% for show in shows %}
-            <a href="/shows/{{show['id']}}/--" class="movie-card drop-shadow-md">
-              <img
-                src="/api/poster/{{ show['id'] }}"
-                alt="Movie poster"
-                class="w-full"
-                style="aspect-ratio: 2/3"
-              />
-              <div class="movie-card-details">
-                <h3 class="font-semibold">{{ show["title"] }}</h3>
-                <p class="text-gray-300 text-ellipsis w-full overflow-hidden">
-                  {{ show["release_year"] }} •
-                  <sl-rating
-                    label="Rating"
-                    readonly
-                    value="{{ show['imdb_score'] / 2 }}"
-                    style="--symbol-size: 12px"
-                  ></sl-rating>
-                </p>
-              </div>
-            </a>
-            {% endfor %}
-          </div>
+extends '__layout__.html' %} {% block title %}{{genre_name}}{% endblock %} {%
+block head %}
+<style>
+  .movies-container {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1rem;
+    grid-auto-rows: auto;
+    margin-bottom: 2rem;
+    text-decoration: none;
+  }
+
+  .movie-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    color: white;
+    transition: 0.15s;
+  }
+
+  .movie-card:hover {
+    transform: scale(1.05);
+  }
+
+  .movie-card-details {
+    position: absolute;
+    bottom: -94px;
+    left: 0;
+    right: 0;
+    padding: 16px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0));
+    padding-top: 30px;
+    transition: 0.15s;
+  }
+
+  .movie-card:hover .movie-card-details {
+    bottom: 0;
+  }
+
+  .movie-card-details p {
+    font-size: 0.8rem;
+  }
+</style>
+{% endblock %} {% block content %}
+<form method="GET" action="/catalogue" class="mb-4">
+  <div class="container mx-auto flex-wrap items-center grid grid-cols-12">
+    <!-- Search Bar -->
+    <sl-input class="col-span-4" type="text" name="query" placeholder="Search for movies or shows..." value="{{ request.args.get('query', '') }}"/></sl-input>
+
+    <!-- Genre Dropdown -->
+    <sl-select class="col-span-2" name="genre">
+      <sl-option value="">All Genres</sl-option>
+      {% for genre in genres %}
+      <sl-option value="{{ genre }}" {% if request.args.get('genre')==genre %}selected{% endif %}>
+        {{ genre }}
+      </sl-option>
+      {% endfor %}
+    </sl-select>
+
+    <!-- Release Year Filter -->
+    <sl-select class="col-span-1" name="release_year">
+      <sl-option value="">All Years</sl-option>
+      {% for year in release_years %}
+      <sl-option value="{{ year }}" {% if request.args.get('release_year')==year|string %}selected{% endif %}>
+        {{ year }}
+      </sl-option>
+      {% endfor %}
+    </sl-select>
+
+    <!-- Country Filter -->
+    <sl-select class="col-span-1" name="country">
+      <sl-option value="">All Countries</sl-option>
+      {% for country in countries %}
+      <sl-option value="{{ country }}" {% if request.args.get('country')==country %}selected{% endif %}>
+        {{ country }}
+      </sl-option>
+      {% endfor %}
+    </sl-select>
+
+    <!-- Show Type Filter -->
+    <sl-select class="col-span-1" name="show_type">
+      <sl-option value="">All Types</sl-option>
+      {% for show_type in show_types %}
+      <sl-option value="{{ show_type }}" {% if request.args.get('show_type')==show_type %}selected{% endif %}>
+        {{ show_type }}
+      </sl-option>
+      {% endfor %}
+    </sl-select>
+
+    <!-- Age Certification Filter -->
+    <sl-select class="col-span-2" name="age_certification">
+      <sl-option value="">All Certifications</sl-option>
+      {% for age in age_certifications %}
+      <sl-option value="{{ age }}" {% if request.args.get('age_certification')==age %}selected{% endif %}>
+        {{ age }}
+      </sl-option>
+      {% endfor %}
+    </sl-select>
+    <!-- Submit Button -->
+    <sl-button class="col-span-1" type="submit">
+      Search
+    </sl-button>
+  </div>
+</form>
+<div class="max-w-[1200px] me-auto ms-auto pt-3">
+  <h3 class="text-2xl font-semibold mb-2">
+    {{ result_text }}
+
+
+    <div class="movies-container">
+      {% for show in shows %}
+      <a href="/shows/{{show['id']}}/--" class="movie-card drop-shadow-md">
+        <img src="/api/poster/{{ show['id'] }}" alt="Movie poster" class="w-full" style="aspect-ratio: 2/3" />
+        <div class="movie-card-details">
+          <h3 class="font-semibold">{{ show["title"] }}</h3>
+          <p class="text-gray-300 text-ellipsis w-full overflow-hidden">
+            {{ show["release_year"] }} •
+            <sl-rating label="Rating" readonly value="{{ show['imdb_score'] / 2 }}"
+              style="--symbol-size: 12px"></sl-rating>
+          </p>
         </div>
-        {% endblock %}
-        
+      </a>
+      {% endfor %}
+    </div>
+</div>
+{% endblock %}

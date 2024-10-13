@@ -82,6 +82,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 });
                 if (response.status === 200) {
                     new_comment.remove();
+                    location.reload();
                 } else {
                     const data = await response.json();
                     comment_error_label.innerText = data.error;

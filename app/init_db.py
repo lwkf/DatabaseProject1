@@ -9,7 +9,8 @@ def init_db():
     with open("./app/schema.sql", "r") as f:
         conn.executescript(f.read())
     conn.commit()
-    admin_password = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
+    #admin_password = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
+    admin_password = "INF2003AdminPWD"
     create_user(
         username = "admin",
         email = "admin@example.com",
@@ -17,6 +18,14 @@ def init_db():
         admin_permissions = 0xFFFFFFFF
     )
     print(f"Created user 'admin' at 'admin@example.com' with password '{admin_password}'")
+
+    user_password = "INF2003UserPWD"
+    create_user(
+        username = "user",
+        email = "user@example.com",
+        unhashed_password = user_password
+    )
+    print(f"Created user 'user' at 'user@example.com' with password '{user_password}'")
     
     cursor = conn.cursor()
     with open("./movie_data.csv", "r", encoding = "utf8") as f:

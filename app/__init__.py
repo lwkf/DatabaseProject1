@@ -293,7 +293,7 @@ def create_app():
         cursor = db_conn.cursor()
         # Fetch user comments from the database
         cursor.execute('''
-            SELECT c.comment, c.created_at, c.show_id, c.is_deleted, s.title 
+            SELECT c.comment, c.created_at, c.show_id, c.is_deleted, c.id, s.title 
             FROM show_comments c 
             JOIN shows s ON c.show_id = s.id 
             WHERE c.user_id = ?
@@ -307,7 +307,8 @@ def create_app():
             'created_at': datetime.strptime(comment['created_at'], "%Y-%m-%d %H:%M:%S.%f").strftime("%B %d, %Y, %I:%M %p"),
             'title': comment['title'],
             'show_id': comment['show_id'],
-            'is_deleted': comment['is_deleted']
+            'is_deleted': comment['is_deleted'],
+            'id': comment['id']
         } for comment in comments]
 
         return render_template('userProfile.html', user=current_user, comments=formatted_comments)
