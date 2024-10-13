@@ -21,7 +21,7 @@ def init_db():
 
     user_password = "INF2003UserPWD"
     create_user(
-        username = "user",
+        username = "exampleUser",
         email = "user@example.com",
         unhashed_password = user_password
     )
