@@ -49,7 +49,7 @@
                 <img src="/api/poster/{{ show['id'] }}" alt="Movie poster" class="w-full" style="aspect-ratio: 2/3;">
                 <div class="movie-card-details">
                     <h3 class="font-semibold">{{ show["title"] }}</h3>
-                    <p class="text-gray-300 text-ellipsis w-full overflow-hidden">{{ show["release_year"] }} • <sl-rating label="Rating" readonly value="{{ show['imdb_score'] / 2 }}" style="--symbol-size: 12px;"></sl-rating></p>
+                    <p class="text-gray-300 text-ellipsis w-full overflow-hidden">{{ show["release_year"] }} • <sl-rating label="Rating" readonly value="{{ float(show['imdb_score']) / 2 }}" style="--symbol-size: 12px;"></sl-rating></p>
                 </div>
             </a>
             {% endfor %}

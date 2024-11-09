@@ -56,17 +56,17 @@
       <div class="bg-white rounded-md p-4">
         <h1 class="text-3xl font-semibold mb-2">{{ show["title"] }}</h1>
         <div class="flex items-center">
-          {% for genre in show_genres %}<a href="/genres/{{ genre['genre']}}"><sl-badge variant="neutral" pill>{{
-              genre['genre'] }}</sl-badge></a>
+          {% for genre in show_genres %}
+            <a href="/genres/{{ genre }}"><sl-badge variant="neutral" pill>{{ genre }}</sl-badge></a>
           {% endfor %}
         </div>
 
         <p class="text-gray-800 text-ellipsis w-full overflow-hidden font-semibold">
           {{ show["release_year"] }} •
-          <sl-rating label="Rating" readonly value="{{ show['imdb_score'] / 2 }}"
+          <sl-rating label="Rating" readonly value="{{ float(show['imdb_score']) / 2 }}"
             style="--symbol-size: 12px"></sl-rating>
           • {{ show['age_ceritification'] }} • {{ show['show_type']}} • Produced
-          In: {% for country in show_countries %} {{ country['country'] }} {%
+          In: {% for country in show_countries %} {{ country }} {%
           endfor %}
         </p>
         <p class="text-gray-800 text-ellipsis w-full overflow-hidden">

@@ -1,15 +1,32 @@
 import random
 import string
+import time
 import csv
+import pymongo
 from datetime import datetime
-from app.utils import get_db_connection
+from app.utils import get_db
 from app.services.authentication import create_user
 def init_db():
-    conn = get_db_connection()
-    with open("./app/schema.sql", "r") as f:
-        conn.executescript(f.read())
-    conn.commit()
-    #admin_password = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
+    mongo_db_conn = get_db()
+    try:
+        mongo_db_conn.create_collection("users")
+        mongo_db_conn.create_collection("shows")
+        mongo_db_conn.create_collection("credits")
+        mongo_db_conn.create_collection("show_comments")
+        
+        mongo_db_conn.users.create_index("uid", unique = True)
+        mongo_db_conn.shows.create_index("id", unique = True)
+        mongo_db_conn.shows.create_index("genres")
+        mongo_db_conn.shows.create_index("production_countries")
+        mongo_db_conn.shows.create_index("release_year")
+        mongo_db_conn.shows.create_index("age_certification")
+        mongo_db_conn.credits.create_index("title_id")
+        mongo_db_conn.show_comments.create_index("show_id")
+        mongo_db_conn.show_comments.create_index("user_id")
+        mongo_db_conn.show_comments.create_index("comment_parent_id")
+    except:
+        return # Database already initialized or is being initialized by another thread
+    
     admin_password = "INF2003AdminPWD"
     create_user(
         username = "admin",
@@ -27,48 +44,50 @@ def init_db():
     )
     print(f"Created user 'user' at 'user@example.com' with password '{user_password}'")
     
-    cursor = conn.cursor()
     with open("./movie_data.csv", "r", encoding = "utf8") as f:
         """id,title,type,description,release_year,age_certification,runtime,genres,production_countries,seasons,imdb_id,imdb_score,imdb_votes,tmdb_popularity,tmdb_score"""
         file_reader = csv.DictReader(f)
+        show_id_counter = 0
         for row in file_reader:
             imdb_id = row["imdb_id"]
             if imdb_id == "Unknown":
-                continue # Too lazy to handle this
+                continue
             imdb_popularity = round( float(row["imdb_score"]) * float(row["imdb_votes"]) )
-            cursor.execute(
-        """INSERT INTO shows (title_id, title, show_type, description, release_year, age_ceritification, show_runtime_minutes, seasons, imdb_id, imdb_score, imdb_votes, tmdb_popularity, tmdb_score, imdb_popularity)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", (row["id"], row["title"], row["type"], row["description"], row["release_year"], row["age_certification"], row["runtime"], row["seasons"], row["imdb_id"], row["imdb_score"], row["imdb_votes"], row["tmdb_popularity"], row["tmdb_score"], imdb_popularity))
             show_genre = row["genres"].split(", ")
-            for genre in show_genre:
-                cursor.execute(
-                    """INSERT INTO show_genres (imdb_id, genre) VALUES (?,?)""", (imdb_id, genre)
-                )
             show_production_countries = row["production_countries"].split(", ")
-            for country in show_production_countries:
-                cursor.execute(
-                    """INSERT INTO show_production_countries (imdb_id, country) VALUES (?,?)""", (imdb_id, country)
-                )
+            generated_show_id = int.from_bytes( ( (show_id_counter.to_bytes( 2, byteorder = "big" )) + int( time.time() * 1000 ).to_bytes( 6, byteorder = "big" )) , byteorder = "big" )
+            mongo_db_conn.shows.insert_one({
+                "id": generated_show_id,
+                "title_id": row["id"],
+                "title": row["title"],
+                "show_type": row["type"],
+                "description": row["description"],
+                "release_year": row["release_year"],
+                "age_certification": row["age_certification"],
+                "show_runtime_minutes": row["runtime"],
+                "seasons": row["seasons"],
+                "imdb_id": row["imdb_id"],
+                "imdb_score": row["imdb_score"],
+                "imdb_votes": row["imdb_votes"],
+                "tmdb_popularity": row["tmdb_popularity"],
+                "tmdb_score": row["tmdb_score"],
+                "imdb_popularity": imdb_popularity,
+                "show_poster_url": None,
+                
+                "genres": show_genre,
+                "production_countries": show_production_countries
+            })
+            show_id_counter += 1
 
     with open("./movie_credits.csv", "r", encoding="utf8") as f:
         credits_reader = csv.DictReader(f)
         for row in credits_reader:
-            cursor.execute(
-                """INSERT INTO credits (person_id, title_id, person_name, character_name, person_role)
-                   VALUES (?,?,?,?,?)""",
-                (row["person_id"], row["id"], row["name"], row["character"], row["role"])
-            )
-
-    def create_preset_comments(): 
-        cursor.execute(
-            """INSERT INTO show_comments (show_id, user_id, comment, created_at) VALUES (?,?,?,?)""",
-            (229, 1, "This is a test parent comment", datetime.now())
-        )
-        cursor.execute(
-            """INSERT INTO show_comments (show_id, user_id, comment, created_at, comment_parent_id) VALUES (?,?,?,?,?)""",
-            (229, 2, "This is a test child comment", datetime.now(), 1)
-        )
-        print("Created preset comments at show_id: 229. Should be Inception.")
-    create_preset_comments()
-
-    conn.commit()
+            mongo_db_conn.credits.insert_one({
+                "person_id": row["person_id"],
+                "title_id": row["id"],
+                "person_name": row["name"],
+                "character_name": row["character"],
+                "person_role": row["role"]
+            })
+    
+    

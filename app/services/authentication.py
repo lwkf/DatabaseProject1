@@ -1,8 +1,10 @@
 import hashlib
+import random
+import time
 from argon2 import PasswordHasher
 from datetime import datetime
 from flask import session, g
-from app.utils import get_db_connection
+from app.utils import get_db
 from app.enums.AdminPermissions import AdminPermission
 from config import Config
 
@@ -36,10 +38,8 @@ def _get_password_hasher() -> PasswordHasher:
     )
 
 def get_user_model_by_id( user_id : int ) -> user_model | None:
-    db_conn = get_db_connection()
-    cursor = db_conn.cursor()
-    cursor.execute("SELECT * FROM users WHERE uid = ?", (user_id,))
-    user_data = cursor.fetchone()
+    mongodb_conn = get_db()
+    user_data = mongodb_conn.users.find_one({ "uid" : user_id })
     if user_data is None:
         return None
     return user_model(
@@ -65,22 +65,18 @@ def does_have_permission( permission : AdminPermission, user_permissions : int )
     return ( user_permissions >> permission.value ) & 1 == 1
 
 def is_username_taken( username : str ) -> bool:
-    db_conn = get_db_connection()
-    cursor = db_conn.cursor()
-    cursor.execute("SELECT * FROM users WHERE LOWER(name) = ?", (username.lower().strip(),))
-    return cursor.fetchone() is not None
+    mongodb_conn = get_db()
+    user_data = mongodb_conn.users.find_one({ "name" : username.lower().strip() })
+    return user_data is not None
 
 def is_email_in_use( email : str ) -> bool:
-    db_conn = get_db_connection()
-    cursor = db_conn.cursor()
-    cursor.execute("SELECT * FROM users WHERE email = ?", (email.lower().strip(),))
-    return cursor.fetchone() is not None
+    mongodb_conn = get_db()
+    user_data = mongodb_conn.users.find_one({ "email" : email.lower().strip() })
+    return user_data is not None
 
 def get_user_by_email( email : str ) -> user_model | None:
-    db_conn = get_db_connection()
-    cursor = db_conn.cursor()
-    cursor.execute("SELECT * FROM users WHERE email = ?", (email.lower().strip(),))
-    user_data = cursor.fetchone()
+    mongodb_conn = get_db()
+    user_data = mongodb_conn.users.find_one({ "email" : email.lower().strip() })
     if user_data is None:
         return None
     return get_user_model_by_id( user_data["uid"] )
@@ -94,22 +90,19 @@ def create_user(
     """
         Creates a user in the database and returns their user ID
     """
-    db_conn = get_db_connection()
-    cursor = db_conn.cursor()
-    cursor.execute(
-        "INSERT INTO users (name, email, created_at, admin_permissions) VALUES (?, ?, ?, ?)",
-        (username, email.lower(), datetime.utcnow(), admin_permissions)
-    )
-    db_conn.commit()
-    user_id = cursor.lastrowid
+    mongo_db_conn = get_db()
+    generated_user_id = int.from_bytes( ( (random.getrandbits( 8 ).to_bytes( 2, byteorder = "big" )) + int( time.time() * 1000 ).to_bytes( 6, byteorder = "big" )) , byteorder = "big" )
+    hashed_password = hash_password_for_user( unhashed_password, generated_user_id )
+    mongo_db_conn.users.insert_one({
+        "uid" : generated_user_id,
+        "name" : username,
+        "email" : email.lower(),
+        "password" : hashed_password,
+        "created_at" : datetime.utcnow(),
+        "admin_permissions" : admin_permissions
+    })
     
-    hashed_password = hash_password_for_user( unhashed_password, user_id )
-    cursor.execute(
-        "UPDATE users SET password = ? WHERE uid = ?",
-        (hashed_password, user_id)
-    )
-    db_conn.commit()
-    return user_id
+    return generated_user_id
     
 def get_current_user() -> user_model:
     if "user_id" not in session:

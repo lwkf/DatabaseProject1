@@ -1,22 +1,19 @@
 import requests
-from app.utils import get_db_connection
+from app.utils import get_db
 from config import Config
 
 web_config = Config()
 
 def get_poster_for_show( show_id : int ) -> str | None:
-    db_conn = get_db_connection()
-    cursor = db_conn.cursor()
-    cursor.execute("SELECT * FROM shows WHERE id = ?", (show_id,))
-    show = cursor.fetchone()
-    if show is None:
+    mongodb_conn = get_db()
+    show_data = mongodb_conn.shows.find_one({ "id" : show_id })
+    if show_data is None:
         return None
-    if show["show_poster_url"] is not None:
-        return show["show_poster_url"]
-    
+    if show_data["show_poster_url"] is not None:
+        return show_data["show_poster_url"]
     try:
         response = requests.get(
-            f"https://api.themoviedb.org/3/find/{ show['imdb_id'] }?external_source=imdb_id",
+            f"https://api.themoviedb.org/3/find/{ show_data['imdb_id'] }?external_source=imdb_id",
             headers = {
                 "Authorization": "Bearer " + web_config.THEMOVIEDB_API_KEY
             }
@@ -30,8 +27,7 @@ def get_poster_for_show( show_id : int ) -> str | None:
         else:
             result = response_json["movie_results"][0] if len( response_json["movie_results"] ) > 0 else response_json["tv_results"][0]
             poster_url = f"https://image.tmdb.org/t/p/w780{ result['poster_path'] }"
-        cursor.execute("UPDATE shows SET show_poster_url = ? WHERE id = ?", (poster_url, show_id))
-        db_conn.commit()
+        mongodb_conn.shows.update_one({ "id" : show_id }, { "$set" : { "show_poster_url" : poster_url } })
         return poster_url
     except Exception as e:
         return None

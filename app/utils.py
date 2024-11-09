@@ -1,6 +1,12 @@
 import sqlite3
+from flask_pymongo import PyMongo
+from flask import current_app, g
+from config import Config
 
-def get_db_connection():
-    conn = sqlite3.connect("database.db")
-    conn.row_factory = sqlite3.Row
-    return conn
+web_config = Config()
+
+def get_db():
+    db = getattr(g, "_mongo_db", None)
+    if db is None:
+        db = g._mongo_db = PyMongo( app = current_app, uri = web_config.MONGODB_URI ).db
+    return db
