@@ -17,9 +17,11 @@ services:
     image: mongodb/mongodb-community-server
     hostname: mongo_db
     volumes:
-      - type: bind
-        source: ./data
-        target: /data/db
+      - db-data:/data/db
+
+volumes:
+  db-data:
+    external: false
 
 # The commented out section below is an example of how to define a PostgreSQL
 # database that your application can use. `depends_on` tells Docker Compose to
