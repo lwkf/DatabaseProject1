@@ -10,13 +10,17 @@
 | WONG KHIN FOONG | 2302728 |
 | WONG JUN KAI | 2302765 |
 
-### Date submitted: 13 October 2024
+### Date submitted: 30 November 2024
 
 # User Manual
 ### Note:
 The API Keys provided are personal and are meant to provide a smoother set up for the person marking. These API Keys are for the Flask app and pulling in the Posters for the Motion Pictures.
 
-## Step 1: Installing Requirements
+## Step 1: Install the Docker app
+Install the Docker app for your environment
+(https://www.docker.com/products/docker-desktop/)
+
+## Step 2: Installing Requirements
 Install the dependencies and libraries our app requires.
 ```
 pip install -r requirements.txt
@@ -25,17 +29,17 @@ pip install -r requirements.txt
 ### Start Up Notes:
 When the app runs for the first time, it checks whether "database.db" exists.
 
-If it does not exist, it runs "init_db.py" which runs "schema.sql" and inserts the contents of "movie_data.csv" and "movie_credits.csv". It will also create 2 accounts, 1 with admin permissions and the other without. Along side, it will create 2 dummy comments under the movie "Inception".
+If it does not exist, it runs "init_db.py" which runs "schema.sql" and inserts the contents of "movie_data.csv" and "movie_credits.csv". It will also create 2 accounts, 1 with admin permissions and the other without.
 
-## Step 2: Run App
-Find and run the file "run_debug_flask.cmd"
+## Step 3: Run App
+Find and run the file "run_docker_build.cmd"
 
-## Step 3: Access the link on a browser
-Find the local address of where the Flask App is being hosted at
+## Step 4: Access the link on a browser
+Find the local address of where the Docker App is being hosted at
 
 Default Address:
 ```
-http://127.0.0.1:5000
+http://localhost:5000
 ```
 
 ## Step 4: Different Access Levels
