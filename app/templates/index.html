@@ -1,0 +1,63 @@
+{% extends '__layout__.html' %}
+{% block title %}Home{% endblock %}
+{% block head %}
+    <style>
+        .movies-container {
+            display: grid;
+            grid-template-columns: repeat( 6, 1fr );
+            gap: 1rem;
+            grid-auto-rows: auto;
+            margin-bottom: 2rem;
+            text-decoration: none;
+        }
+
+        .movie-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 0.5rem;
+            color: white;
+            transition: 0.15s;
+        }
+        .movie-card:hover {
+            transform: scale(1.05);
+        }
+        .movie-card-details {
+            position: absolute;
+            bottom: -94px;
+            left: 0;
+            right: 0;
+            padding: 16px;
+            background: linear-gradient( to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0) );
+            padding-top: 30px;
+            transition: 0.15s;
+        }
+
+        .movie-card:hover .movie-card-details {
+            bottom: 0;
+        }
+        .movie-card-details p {
+            font-size: 0.8rem;
+        }
+
+        .movie-card:first-child,
+        .movie-card:nth-child(2),
+        .movie-card:nth-child(3) {
+            grid-column: span 2;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <div class="max-w-[1200px] me-auto ms-auto pt-3">
+        <div class="movies-container">
+            {% for show in shows %}
+            <a href="/shows/{{show['id']}}/--" class="movie-card drop-shadow-md">
+                <img src="/api/poster/{{ show['id'] }}" alt="Movie poster" class="w-full" style="aspect-ratio: 2/3;">
+                <div class="movie-card-details">
+                    <h3 class="font-semibold">{{ show["title"] }}</h3>
+                    <p class="text-gray-300 text-ellipsis w-full overflow-hidden">{{ show["release_year"] }} • <sl-rating label="Rating" readonly value="{{ float(show['imdb_score']) / 2 }}" style="--symbol-size: 12px;"></sl-rating></p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

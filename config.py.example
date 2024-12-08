@@ -1,0 +1,4 @@
+class Config():
+    FLASK_SESSION_KEY = "EXAMPLEKEY"
+    THEMOVIEDB_API_KEY = "" # Free service https://www.themoviedb.org/
+    MONGODB_URI = "mongodb://localhost:27017/local"
